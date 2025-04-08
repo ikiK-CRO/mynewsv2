@@ -1,8 +1,17 @@
 import styles from './LatestNews.module.scss';
 import Link from 'next/link';
+import React from 'react';
+
+// Define types for news items
+type NewsItem = {
+  id: number;
+  time: string;
+  title: string;
+  href: string;
+};
 
 // Dummy data for latest news
-const latestNewsItems = [
+const latestNewsItems: NewsItem[] = [
   { id: 1, time: '14:30', title: 'How To Write Better Advertising Copy', href: '#' },
   { id: 2, time: '14:30', title: '6 Powerful Tips To Creating Testimonials That Sell Your Products', href: '#' },
   { id: 3, time: '14:30', title: '5 Reasons To Choose A Notebook Over A Computer Desktop', href: '#' },
@@ -11,7 +20,7 @@ const latestNewsItems = [
   // Add more items if needed
 ];
 
-export default function LatestNews() {
+const LatestNews: React.FC = () => {
   return (
     <aside className={styles.latestNews}>
       <h2 className={styles.heading}>
@@ -32,4 +41,6 @@ export default function LatestNews() {
       </Link>
     </aside>
   );
-} 
+};
+
+export default LatestNews; 

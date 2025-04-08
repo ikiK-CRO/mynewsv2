@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import styles from './Sidebar.module.scss';
+import React from 'react';
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+};
 
 // Icons from the Default.svg file with exactly 20px dimensions
-const icons = {
+const icons: Record<string, React.ReactNode> = {
   home: (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M19.7557 9.16673L10.589 0L10.2636 0 9.91065 0 0.744027 9.16673C0.505846 9.40503 0.434516 9.76343 0.563409 10.0747C0.692372 10.386 0.99617 10.5891 1.33315 10.5892H2.37475C2.48985 10.5892 2.58315 10.6824 2.58315 10.7975V18.9225C2.58315 19.3827 2.95625 19.7558 3.41645 19.7558H8.2082C8.32325 19.7558 8.41655 19.6625 8.41655 19.5475V15.5892C8.41655 14.4386 9.34935 13.5058 10.4998 13.5058C11.6504 13.5058 12.5832 14.4386 12.5832 15.5892V19.5475C12.5832 19.6625 12.6765 19.7558 12.7915 19.7558H17.5832C18.0434 19.7558 18.4165 19.3827 18.4165 18.9225V10.7975C18.4165 10.6824 18.5098 10.5892 18.6248 10.5892H19.6665C20.0035 10.5891 20.3073 10.386 20.4362 10.0747C20.5652 9.76343 20.4939 9.40503 20.2557 9.16673Z" fill="currentColor"/>
@@ -49,7 +57,7 @@ const icons = {
   ),
 };
 
-const navItems = [
+const navItems: NavItem[] = [
   { href: '/', label: 'Home', icon: icons.home, active: true }, // Only Home is active
   { href: '/general', label: 'General', icon: icons.general, active: false },
   { href: '/business', label: 'Business', icon: icons.business, active: false },
@@ -59,7 +67,7 @@ const navItems = [
   { href: '/technology', label: 'Technology', icon: icons.technology, active: false },
 ];
 
-export default function Sidebar() {
+const Sidebar: React.FC = () => {
   return (
     <nav className={styles.sidebar}>
       {navItems.map((item) => (
@@ -74,4 +82,6 @@ export default function Sidebar() {
       ))}
     </nav>
   );
-} 
+};
+
+export default Sidebar; 

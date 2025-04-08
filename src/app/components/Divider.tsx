@@ -1,5 +1,8 @@
 import styles from './Divider.module.scss';
+import React from 'react';
 
-export default function Divider() {
+const Divider: React.FC = () => {
   return <div className={styles.divider} />;
-} 
+};
+
+export default Divider; 

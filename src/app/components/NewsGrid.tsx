@@ -1,14 +1,24 @@
 import styles from './NewsGrid.module.scss';
+import React from 'react';
+
+// Define type for news items
+interface NewsItem {
+  id: number;
+  category: string;
+  title: string;
+  author: string;
+  image: string;
+}
 
 // Dummy data for news items
-const newsItems = [
+const newsItems: NewsItem[] = [
   { id: 1, category: 'TECH', title: 'V7 Digital Photo Printing', author: 'Caroline Parsons', image: 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=News+Image+1' },
   { id: 2, category: 'SPORT', title: 'Fta Keys', author: 'Bertie Campbell', image: 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=News+Image+2' },
   { id: 3, category: 'NEWS', title: 'What Is Hdcp', author: 'Jim Gonzalez', image: 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=News+Image+3' },
   { id: 4, category: 'BREAKING', title: 'Peace On Earth A Wonderful Wish But No Way', author: 'Bertie Campbell', image: 'https://via.placeholder.com/400x250/333333/FFFFFF?text=Breaking+News' },
 ];
 
-export default function NewsGrid() {
+const NewsGrid: React.FC = () => {
   return (
     <div className={styles.newsGrid}>
       {newsItems.map((item) => (
@@ -27,4 +37,6 @@ export default function NewsGrid() {
       ))}
     </div>
   );
-} 
+};
+
+export default NewsGrid; 

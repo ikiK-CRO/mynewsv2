@@ -1,6 +1,7 @@
 import styles from './Topbar.module.scss';
+import React from 'react';
 
-export default function Topbar() {
+const Topbar: React.FC = () => {
   return (
     <header className={styles.topbar}>
       <div className="container">
@@ -15,4 +16,6 @@ export default function Topbar() {
       </div>
     </header>
   );
-} 
+};
+
+export default Topbar; 

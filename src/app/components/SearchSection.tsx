@@ -1,6 +1,7 @@
 import styles from './SearchSection.module.scss';
+import React from 'react';
 
-export default function SearchSection() {
+const SearchSection: React.FC = () => {
   return (
     <div className={styles.searchSection}>
       <div className={styles.logo}>
@@ -33,4 +34,6 @@ export default function SearchSection() {
       </div>
     </div>
   );
-} 
+};
+
+export default SearchSection; 

@@ -1,4 +1,6 @@
-export default function SignIn() {
+import React from 'react';
+
+const SignIn: React.FC = () => {
   return (
     <main>
       <h1>Sign In</h1>
@@ -10,4 +12,6 @@ export default function SignIn() {
       </div>
     </main>
   );
-} 
+};
+
+export default SignIn; 

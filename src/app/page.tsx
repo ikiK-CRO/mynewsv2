@@ -4,8 +4,9 @@ import Divider from './components/Divider';
 import Sidebar from './components/Sidebar';
 import NewsGrid from './components/NewsGrid';
 import LatestNews from './components/LatestNews';
+import React from 'react';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <main className={styles.container}>
       <SearchSection />
@@ -24,4 +25,6 @@ export default function Home() {
       </div>
     </main>
   );
-}
+};
+
+export default Home; 
