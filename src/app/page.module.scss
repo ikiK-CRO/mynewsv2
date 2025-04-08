@@ -15,18 +15,26 @@
 
 .contentGrid {
   display: grid;
-  // Sidebar fixed, News grid flexible but constrained, Latest News fixed width
   grid-template-columns: 63px minmax(0, 1fr) 321px;
   gap: 24px; // Adjusted gap to match image better
   align-items: start; // Align items to the top
 }
 
+.sidebarContainer {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+}
+
 .newsGridContainer {
+  grid-column: 2;
+  grid-row: 1 / span 3;
   padding-top: 65px; /* Space from divider for cards */
   margin-top: -65px; /* Negative margin to offset the padding but keep the title properly positioned */
 }
 
 .latestNewsContainer {
+  grid-column: 3;
+  grid-row: 1 / span 2;
   padding-top: 30px; /* Space from divider for widgets */
 }
 
@@ -36,16 +44,27 @@
     grid-template-columns: 1fr; // Stack columns on medium screens
     gap: 24px;
   }
+  
   .sidebarContainer {
-    display: none; // Hide sidebar on smaller screens (or implement mobile nav later)
+    display: none; // Hide sidebar on smaller screens
+  }
+  
+  .newsGridContainer,
+  .latestNewsContainer {
+    grid-column: 1;
+  }
+  
+  .latestNewsContainer {
+    grid-row: 2;
+  }
+  
+  .newsGridContainer {
+    grid-row: 1 / span 3;
   }
 }
 
 @media (max-width: 768px) {
-   .sectionTitle {
-     font-size: 20px;
-   }
-  .latestNewsContainer {
-      grid-row: 2; // Move latest news below grid on small screens
+  .sectionTitle {
+    font-size: 20px;
   }
 } 
