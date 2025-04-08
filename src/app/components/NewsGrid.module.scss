@@ -16,28 +16,18 @@
 
 /* 3-column grid for remaining cards */
 .threeColGrid {
-  margin-top: 24px; 
+  margin-top: 24px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 321px;
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  width: calc(100% + 345px); /* content width + sidebar gap + latest news width */
-  margin-left: -63px; /* align with the start of sidebar */
-  padding-left: 63px; /* counter the negative margin for actual content */
+  width: calc(639px + 24px + 321px - 7px); /* Main content + gap + widget width - 7px */
+  position: relative;
+  left: -3px;
 }
 
 /* Card positioning */
 .threeColCard {
-  &:nth-child(3n+1) {
-    grid-column: 1;
-  }
-  
-  &:nth-child(3n+2) {
-    grid-column: 2;
-  }
-  
-  &:nth-child(3n) {
-    grid-column: 3;
-  }
+  width: 100%;
 }
 
 .newsCard {
@@ -211,6 +201,7 @@
   .threeColGrid {
     width: 100%;
     margin-left: 0;
+    left: 0;
     padding-left: 0;
     grid-template-columns: repeat(3, 1fr);
   }
