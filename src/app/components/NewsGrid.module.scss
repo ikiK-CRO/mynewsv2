@@ -101,32 +101,37 @@
 .breaking {
   background-color: #1D1D1B;
   color: #FFFFFF;
+  height: 100%;
 
   .cardContent {
-     text-align: center;
-     padding: 24px 16px;
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
-     flex-grow: 1;
+    text-align: center;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    min-height: 220px;
   }
 
   .cardHeader {
     flex-direction: column;
     margin-bottom: 12px;
+    width: 100%;
+    justify-content: center;
   }
 
   .breakingTag {
     background-color: #BB1E1E;
     color: #FFFFFF;
-    padding: 4px 10px;
-    font-size: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
     font-weight: 700;
     border-radius: 4px;
     text-transform: uppercase;
     display: inline-block;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
   }
 
   .source {
@@ -138,17 +143,27 @@
     color: #FFFFFF;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-    font-size: 20px;
-    margin-bottom: 8px;
-    line-height: 1.3;
+    font-size: 28px;
+    margin-bottom: 12px;
+    line-height: 1.2;
     letter-spacing: -0.11px;
+    
+    a {
+      color: #FFFFFF;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   .author {
     color: rgba(255, 255, 255, 0.7);
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
+    margin-top: 8px;
   }
 
   .newsImage {

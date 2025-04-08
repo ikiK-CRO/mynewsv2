@@ -19,6 +19,11 @@ const Home: React.FC = () => {
     setActiveCategory(category);
   }, []);
 
+  // Combine breaking news with regular articles
+  const combinedArticles = [...breakingNews, ...articles.filter(article => 
+    !breakingNews.some(breaking => breaking.id === article.id)
+  )];
+
   return (
     <main className={styles.container}>
       <SearchSection />
@@ -29,7 +34,7 @@ const Home: React.FC = () => {
         </aside>
         <section className={styles.newsGridContainer}>
           <h2 className={styles.sectionTitle}>News</h2>
-          <NewsGrid articles={articles} loading={loading} />
+          <NewsGrid articles={combinedArticles} loading={loading} />
         </section>
         <aside className={styles.latestNewsContainer}>
           <LatestNews latestNews={latestNews} loading={loading} />

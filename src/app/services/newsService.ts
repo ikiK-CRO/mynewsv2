@@ -89,28 +89,38 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
 
 export async function getBreakingNews(): Promise<UnifiedArticle[]> {
   try {
-    // For breaking news, we'll use top headlines from NewsAPI
-    const newsApiHeadlines = await getTopHeadlinesByCategory();
+    // Fetch from both sources in parallel
+    const results = await Promise.allSettled([
+      getTopHeadlinesByCategory(), // NewsAPI
+      getTopStoriesBySection('home') // NY Times
+    ]);
     
-    // Mark the first 1-2 items as breaking news
-    return newsApiHeadlines.slice(0, 2).map(article => ({
-      ...article,
-      category: 'BREAKING'
-    }));
+    const breakingNews: UnifiedArticle[] = [];
+    
+    // Add top article from NewsAPI if successful
+    if (results[0].status === 'fulfilled' && results[0].value.length > 0) {
+      breakingNews.push({
+        ...results[0].value[0],
+        category: 'BREAKING'
+      });
+    }
+    
+    // Add top article from NY Times if successful
+    if (results[1].status === 'fulfilled' && results[1].value.length > 0) {
+      breakingNews.push({
+        ...results[1].value[0],
+        category: 'BREAKING'
+      });
+    }
+    
+    // If both APIs failed, return empty array
+    if (breakingNews.length === 0) {
+      console.error('Failed to fetch breaking news from any source');
+    }
+    
+    return breakingNews;
   } catch (error) {
     console.error('Error fetching breaking news:', error);
-    
-    // Try NY Times as fallback for breaking news
-    try {
-      console.log('Falling back to NY Times for breaking news');
-      const nyTimesArticles = await getTopStoriesBySection('home');
-      return nyTimesArticles.slice(0, 2).map(article => ({
-        ...article,
-        category: 'BREAKING'
-      }));
-    } catch (fallbackError) {
-      console.error('Fallback also failed:', fallbackError);
-      return [];
-    }
+    return [];
   }
 } 
