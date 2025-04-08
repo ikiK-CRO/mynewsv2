@@ -1,0 +1,83 @@
+@use '../styles/abstracts/variables' as v;
+
+.sidebar {
+  position: relative; // Changed from absolute to fit within grid
+  width: 63px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px; // Approximate gap based on image
+}
+
+.navItem {
+  position: relative;
+  width: 63px;
+  height: 63px;
+  background: #FFFFFF;
+  box-shadow: 0px 1px 2px -1px #C8CAD1;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px); // Subtle hover effect
+  }
+
+  .iconWrapper {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      path {
+        transition: fill 0.2s ease-in-out;
+        fill: v.$color-text; // Default icon color
+        opacity: 0.5;
+      }
+      stroke {
+        stroke: v.$color-text; // Default icon color
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .label {
+    font-family: v.$font-family-base; // Using InterV_Semi from your code
+    font-size: 10px;
+    line-height: 14px;
+    text-align: center;
+    letter-spacing: 0.1px;
+    color: v.$color-text;
+    opacity: 0.5;
+    transition: all 0.2s ease-in-out;
+  }
+
+  &.active {
+    .iconWrapper {
+      svg {
+        path {
+          fill: v.$color-primary;
+           opacity: 1;
+        }
+         stroke {
+          stroke: v.$color-primary;
+           opacity: 1;
+        }
+      }
+    }
+
+    .label {
+      color: v.$color-primary;
+      opacity: 1;
+    }
+  }
+} 

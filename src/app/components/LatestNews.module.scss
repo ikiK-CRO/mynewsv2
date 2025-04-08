@@ -1,0 +1,82 @@
+@use '../styles/abstracts/variables' as v;
+@use 'sass:color'; // Import the color module
+
+.latestNews {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  height: fit-content; // Adjust height based on content
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: v.$color-text;
+  margin-bottom: 20px;
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
+  background-color: v.$color-primary; // Red icon like in the image
+  border-radius: 50%;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.newsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EEE; // Separator line
+}
+
+.newsItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EEE; // Separator line between items
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.time {
+  font-size: 12px;
+  color: rgba(v.$color-text, 0.5);
+}
+
+.titleLink {
+  font-size: 14px;
+  font-weight: 500;
+  color: v.$color-text;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: v.$color-primary;
+  }
+}
+
+.seeAllLink {
+  font-size: 14px;
+  font-weight: 500;
+  color: v.$color-primary;
+  text-decoration: none;
+  display: block;
+  text-align: left; // Aligned to left as per image
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: color.adjust(v.$color-primary, $lightness: -10%);
+  }
+} 

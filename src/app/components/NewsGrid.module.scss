@@ -1,0 +1,93 @@
+@use '../styles/abstracts/variables' as v;
+
+.newsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); // Responsive grid
+  gap: 24px;
+}
+
+.newsCard {
+  background: #FFFFFF;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+     transform: translateY(-4px);
+  }
+}
+
+.newsImage {
+  width: 100%;
+  height: 200px; // Adjust height as needed
+  object-fit: cover;
+  display: block;
+}
+
+.cardContent {
+  padding: 16px;
+}
+
+.category {
+  font-size: 10px;
+  font-weight: 600;
+  color: v.$color-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: v.$color-text;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.author {
+  font-size: 12px;
+  color: rgba(v.$color-text, 0.6);
+}
+
+// Styles for the breaking news card
+.breaking {
+  background-color: v.$color-text; // Dark background
+  position: relative;
+  color: #FFFFFF;
+
+  .cardContent {
+     text-align: center;
+     padding: 32px 16px; // More padding for breaking news
+  }
+
+  .breakingTag {
+    background-color: v.$color-primary;
+    color: #FFFFFF;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    color: #FFFFFF;
+    font-size: 24px; // Larger title for breaking news
+    margin-bottom: 12px;
+  }
+
+  .author {
+    color: rgba(#FFFFFF, 0.7);
+  }
+
+  .newsImage {
+    opacity: 0.5; // Slightly dim image for text overlay
+  }
+} 

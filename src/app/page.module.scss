@@ -1,0 +1,20 @@
+.container {
+  max-width: 1440px; // Adjust max width as needed
+  margin: 0 auto;
+  padding: 24px; // Consistent padding
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 63px 1fr auto; // Sidebar width, flexible news grid, auto latest news
+  gap: 32px; // Gap between sections
+  margin-top: 24px; // Space below the divider
+}
+
+// Responsive adjustments if needed
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr; // Stack columns on smaller screens
+    gap: 24px;
+  }
+} 
