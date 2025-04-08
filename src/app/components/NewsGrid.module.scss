@@ -34,14 +34,29 @@
   padding: 12px 16px;
 }
 
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
 .category {
   font-size: 10px;
   font-weight: 700; // Bold for category/time like InterV_Bold
   color: #1E71BB; // Use blue from Latest News specs
   text-transform: uppercase;
   letter-spacing: -0.015px; // From Latest News specs
-  display: block;
-  margin-bottom: 6px;
+}
+
+.source {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6B6B6B;
+  background-color: #F5F5F5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: -0.015px;
 }
 
 .title {
@@ -76,6 +91,11 @@
      flex-grow: 1;
   }
 
+  .cardHeader {
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
   .breakingTag {
     background-color: #BB1E1E; // Keep red for breaking
     color: #FFFFFF;
@@ -85,7 +105,12 @@
     border-radius: 4px;
     text-transform: uppercase;
     display: inline-block;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+  }
+
+  .source {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
   }
 
   .title {

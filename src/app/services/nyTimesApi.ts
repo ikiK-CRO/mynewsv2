@@ -6,8 +6,9 @@ import {
   UnifiedArticle 
 } from '../types/news';
 
-const NYT_API_KEY = 'q7SOPsdLjMZHyiJ1d4kkt57TSySHkxFp';
+const NYT_API_KEY = process.env.NEXT_PUBLIC_NYT_API_KEY || '';
 const BASE_URL = 'https://api.nytimes.com/svc';
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/440x293/E8E8E8/AAAAAA?text=New+York+Times';
 
 // Map NYTimes section names to our sidebar categories
 const SECTION_CATEGORY_MAP: Record<string, string> = {
@@ -29,46 +30,93 @@ const SECTION_CATEGORY_MAP: Record<string, string> = {
   'automobiles': 'business',
 };
 
-export async function fetchMostPopular(period: number = 1): Promise<NYTimesPopularResponse> {
-  const url = `${BASE_URL}/mostpopular/v2/viewed/${period}.json?api-key=${NYT_API_KEY}`;
+// Utility function to add delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Fetch with retry logic for rate limiting
+async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
+  let retries = 0;
   
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch most popular articles: ${response.statusText}`);
+  while (retries <= maxRetries) {
+    const response = await fetch(url);
+    
+    // If not rate limited or max retries reached, return the response
+    if (response.status !== 429 || retries === maxRetries) {
+      return response;
+    }
+    
+    // Exponential backoff: wait longer between each retry
+    const waitTime = Math.pow(2, retries) * 1000;
+    console.log(`Rate limited by NY Times API. Retrying in ${waitTime}ms...`);
+    await delay(waitTime);
+    retries++;
   }
   
-  return response.json();
+  // This shouldn't be reached as we return inside the loop,
+  // but TypeScript requires a return statement
+  throw new Error('Unexpected error in fetchWithRetry');
+}
+
+export async function fetchMostPopular(period: number = 1): Promise<NYTimesPopularResponse> {
+  if (!NYT_API_KEY) {
+    throw new Error('NY Times API key is missing. Please check your environment variables.');
+  }
+
+  const url = `${BASE_URL}/mostpopular/v2/viewed/${period}.json?api-key=${NYT_API_KEY}`;
+  
+  try {
+    const response = await fetchWithRetry(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch most popular articles: ${response.statusText}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching most popular articles:', error);
+    throw error;
+  }
 }
 
 export async function fetchTopStories(section: string = 'home'): Promise<NYTimesTopStoriesResponse> {
+  if (!NYT_API_KEY) {
+    throw new Error('NY Times API key is missing. Please check your environment variables.');
+  }
+
   const url = `${BASE_URL}/topstories/v2/${section}.json?api-key=${NYT_API_KEY}`;
   
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch top stories: ${response.statusText}`);
+  try {
+    const response = await fetchWithRetry(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch top stories: ${response.statusText}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching top stories:', error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 export function mapNYTimesPopularToUnified(article: NYTimesPopularArticle): UnifiedArticle {
   const imageUrl = article.media && article.media.length > 0 && article.media[0]['media-metadata'] 
     ? article.media[0]['media-metadata'].find(meta => meta.format === 'mediumThreeByTwo440')?.url || 
       article.media[0]['media-metadata'][article.media[0]['media-metadata'].length - 1]?.url 
-    : undefined;
+    : PLACEHOLDER_IMAGE;
 
   return {
     id: article.uri,
-    title: article.title,
-    description: article.abstract,
+    title: article.title || 'No Title Available',
+    description: article.abstract || 'No description available',
     url: article.url,
     imageUrl,
     publishedAt: article.published_date,
     source: 'New York Times',
-    author: article.byline.replace('By ', ''),
-    category: SECTION_CATEGORY_MAP[article.section.toLowerCase()] || 'general'
+    author: article.byline ? article.byline.replace('By ', '') : 'New York Times',
+    category: article.section && SECTION_CATEGORY_MAP[article.section.toLowerCase()] 
+      ? SECTION_CATEGORY_MAP[article.section.toLowerCase()] 
+      : 'general'
   };
 }
 
@@ -76,18 +124,20 @@ export function mapNYTimesTopStoryToUnified(article: NYTimesTopStoryArticle): Un
   const imageUrl = article.multimedia && article.multimedia.length > 0 
     ? article.multimedia.find(media => media.format === 'mediumThreeByTwo440')?.url || 
       article.multimedia[0]?.url 
-    : undefined;
+    : PLACEHOLDER_IMAGE;
 
   return {
     id: article.uri,
-    title: article.title,
-    description: article.abstract,
+    title: article.title || 'No Title Available',
+    description: article.abstract || 'No description available',
     url: article.url,
     imageUrl,
     publishedAt: article.published_date,
     source: 'New York Times',
-    author: article.byline.replace('By ', ''),
-    category: SECTION_CATEGORY_MAP[article.section.toLowerCase()] || 'general'
+    author: article.byline ? article.byline.replace('By ', '') : 'New York Times',
+    category: article.section && SECTION_CATEGORY_MAP[article.section.toLowerCase()] 
+      ? SECTION_CATEGORY_MAP[article.section.toLowerCase()] 
+      : 'general'
   };
 }
 

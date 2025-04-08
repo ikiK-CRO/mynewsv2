@@ -89,6 +89,13 @@
   }
 }
 
+.newsItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .time {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
@@ -97,7 +104,16 @@
   letter-spacing: -0.015px;
   text-transform: uppercase;
   color: #1E71BB;
-  margin-bottom: 4px;
+}
+
+.source {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6B6B6B;
+  background-color: #F5F5F5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: -0.015px;
 }
 
 .titleLink {

@@ -43,7 +43,10 @@ const LatestNews: React.FC<LatestNewsProps> = ({ latestNews, loading }) => {
         {latestNews && latestNews.length > 0 ? (
           latestNews.map((item) => (
             <div key={item.id} className={styles.newsItem}>
-              <span className={styles.time}>{formatTime(item.publishedAt)}</span>
+              <div className={styles.newsItemHeader}>
+                <span className={styles.time}>{formatTime(item.publishedAt)}</span>
+                <span className={styles.source}>{item.source}</span>
+              </div>
               <a 
                 href={item.url} 
                 className={styles.titleLink}
