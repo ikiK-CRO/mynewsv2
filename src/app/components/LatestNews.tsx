@@ -1,40 +1,62 @@
+'use client';
+
 import styles from './LatestNews.module.scss';
 import Link from 'next/link';
 import React from 'react';
+import { UnifiedArticle } from '../types/news';
 
-// Define types for news items
-type NewsItem = {
-  id: number;
-  time: string;
-  title: string;
-  href: string;
-};
+interface LatestNewsProps {
+  latestNews: UnifiedArticle[];
+  loading: boolean;
+}
 
-// Dummy data for latest news
-const latestNewsItems: NewsItem[] = [
-  { id: 1, time: '14:30', title: 'How To Write Better Advertising Copy', href: '#' },
-  { id: 2, time: '14:30', title: '6 Powerful Tips To Creating Testimonials That Sell Your Products', href: '#' },
-  { id: 3, time: '14:30', title: '5 Reasons To Choose A Notebook Over A Computer Desktop', href: '#' },
-  { id: 4, time: '14:30', title: 'Cdc Issues Health Alert Notice For Travelers To Usa From Hon', href: '#' },
-  { id: 5, time: '14:30', title: 'Use Your Reset Button', href: '#' },
-  // Add more items if needed
-];
+const LatestNews: React.FC<LatestNewsProps> = ({ latestNews, loading }) => {
+  // Format time as HH:MM
+  const formatTime = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: false 
+    });
+  };
 
-const LatestNews: React.FC = () => {
+  if (loading) {
+    return (
+      <aside className={styles.latestNews}>
+        <h2 className={styles.heading}>
+          <span className={styles.icon}></span> Latest news
+        </h2>
+        <div className={styles.newsList}>
+          <p>Loading latest news...</p>
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className={styles.latestNews}>
       <h2 className={styles.heading}>
         <span className={styles.icon}></span> Latest news
       </h2>
       <div className={styles.newsList}>
-        {latestNewsItems.map((item) => (
-          <div key={item.id} className={styles.newsItem}>
-            <span className={styles.time}>{item.time}</span>
-            <Link href={item.href} className={styles.titleLink}>
-              {item.title}
-            </Link>
-          </div>
-        ))}
+        {latestNews && latestNews.length > 0 ? (
+          latestNews.map((item) => (
+            <div key={item.id} className={styles.newsItem}>
+              <span className={styles.time}>{formatTime(item.publishedAt)}</span>
+              <a 
+                href={item.url} 
+                className={styles.titleLink}
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                {item.title}
+              </a>
+            </div>
+          ))
+        ) : (
+          <p>No latest news available</p>
+        )}
       </div>
       <Link href="/all-news" className={styles.seeAllLink}>
         See all news &gt;

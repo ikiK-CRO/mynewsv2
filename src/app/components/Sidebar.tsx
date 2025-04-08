@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import styles from './Sidebar.module.scss';
 import React from 'react';
@@ -6,7 +8,7 @@ type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
-  active: boolean;
+  category: string;
 };
 
 // Icons from the Default.svg file with exactly 20px dimensions
@@ -58,23 +60,36 @@ const icons: Record<string, React.ReactNode> = {
 };
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Home', icon: icons.home, active: true }, // Only Home is active
-  { href: '/general', label: 'General', icon: icons.general, active: false },
-  { href: '/business', label: 'Business', icon: icons.business, active: false },
-  { href: '/health', label: 'Health', icon: icons.health, active: false },
-  { href: '/science', label: 'Science', icon: icons.science, active: false },
-  { href: '/sports', label: 'Sports', icon: icons.sports, active: false },
-  { href: '/technology', label: 'Technology', icon: icons.technology, active: false },
+  { href: '/', label: 'Home', icon: icons.home, category: 'general' },
+  { href: '/category/general', label: 'General', icon: icons.general, category: 'general' },
+  { href: '/category/business', label: 'Business', icon: icons.business, category: 'business' },
+  { href: '/category/health', label: 'Health', icon: icons.health, category: 'health' },
+  { href: '/category/science', label: 'Science', icon: icons.science, category: 'science' },
+  { href: '/category/sports', label: 'Sports', icon: icons.sports, category: 'sports' },
+  { href: '/category/technology', label: 'Technology', icon: icons.technology, category: 'technology' },
 ];
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  activeCategory?: string;
+  onCategoryChange?: (category: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategoryChange }) => {
+  const handleItemClick = (category: string, e: React.MouseEvent) => {
+    if (onCategoryChange) {
+      e.preventDefault();
+      onCategoryChange(category);
+    }
+  };
+
   return (
     <nav className={styles.sidebar}>
       {navItems.map((item) => (
         <Link
           href={item.href}
           key={item.label}
-          className={`${styles.navItem} ${item.active ? styles.active : ''}`}
+          className={`${styles.navItem} ${item.category === activeCategory ? styles.active : ''}`}
+          onClick={(e) => handleItemClick(item.category, e)}
         >
           <div className={styles.iconWrapper}>{item.icon}</div>
           <span className={styles.label}>{item.label}</span>
