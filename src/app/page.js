@@ -1,8 +1,9 @@
 export default function Home() {
   return (
+    <>
     <main>
-      <h1>Welcome to My News</h1>
       <div>
+        <h1>Welcome to My News</h1>
         <p>This is a clean starting page.</p>
         <div>
           <a href="/signin">Sign In</a>
@@ -10,5 +11,6 @@ export default function Home() {
         </div>
       </div>
     </main>
+    </>
   );
 }

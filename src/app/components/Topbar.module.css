@@ -1,0 +1,15 @@
+.topbar {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  background-image: url('/Lovepik_com-832643857-Creative tech style gradient line shape vector.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.topbarContent {
+  display: flex;
+  align-items: center;
+  height: 100%;
+} 

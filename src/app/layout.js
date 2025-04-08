@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./fonts.css";
+import Topbar from "./components/Topbar";
 
 export const metadata = {
   title: "My News App",
@@ -10,7 +11,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        {children}
+        <Topbar />
+        <div className="container">
+          {children}
+        </div>
       </body>
     </html>
   );
