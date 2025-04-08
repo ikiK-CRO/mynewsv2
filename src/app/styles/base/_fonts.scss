@@ -1,0 +1,22 @@
+// Font faces
+@mixin font-face($family, $filename, $style: normal) {
+  @font-face {
+    font-family: $family;
+    font-style: $style;
+    font-display: swap;
+    src: url('/fonts/#{$filename}.woff2') format('woff2');
+  }
+}
+
+// Regular font
+@include font-face('Inter-Regular', 'Inter-Regular');
+
+// Bold font
+@include font-face('Inter-Bold', 'Inter-Bold');
+
+// Black font
+@include font-face('Inter-Black', 'Inter-Black');
+
+// Variable fonts
+@include font-face('Inter', 'InterVariable');
+@include font-face('Inter', 'InterVariable-Italic', italic); 

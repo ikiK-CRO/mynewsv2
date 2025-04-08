@@ -1,0 +1,59 @@
+@use 'variables' as v;
+
+// Flexbox mixins
+@mixin flex($direction: row, $justify: flex-start, $align: stretch, $gap: 0) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  @if $gap != 0 {
+    gap: $gap;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Position mixins
+@mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
+  position: absolute;
+  @if $top != null {
+    top: $top;
+  }
+  @if $right != null {
+    right: $right;
+  }
+  @if $bottom != null {
+    bottom: $bottom;
+  }
+  @if $left != null {
+    left: $left;
+  }
+}
+
+// Container mixin
+@mixin container {
+  max-width: v.$container-max-width;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+}
+
+// Typography mixins
+@mixin font-regular {
+  font-family: v.$font-family-regular;
+  font-weight: 400;
+}
+
+@mixin font-bold {
+  font-family: v.$font-family-bold;
+  font-weight: 700;
+}
+
+@mixin font-black {
+  font-family: v.$font-family-black;
+  font-weight: 900;
+} 

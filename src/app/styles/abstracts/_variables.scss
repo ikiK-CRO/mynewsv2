@@ -1,0 +1,47 @@
+// Colors
+$color-primary: #BB1E1E;
+$color-text: #1D1D1B;
+$color-border: #E8E8E8;
+$color-icon: #A5A5A4;
+$color-shadow: #C8CAD1;
+$color-white: #FFFFFF;
+$color-background: #F4F5F8;
+
+// Typography
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+$font-family-regular: 'Inter-Regular', $font-family-base;
+$font-family-bold: 'Inter-Bold', $font-family-base;
+$font-family-black: 'Inter-Black', $font-family-base;
+
+// Font sizes
+$font-size-small: 14px;
+$font-size-base: 15px;
+$font-size-medium: 16px;
+$font-size-large: 32px;
+
+// Line heights
+$line-height-base: 20px;
+$line-height-large: 21px;
+
+// Spacing
+$spacing-xs: 5px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 43px;
+$spacing-xxl: 50px;
+
+// Layout
+$container-max-width: 1100px;
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 10px;
+
+// Z-index
+$z-index-base: 1;
+$z-index-header: 10;
+
+// Heights
+$topbar-height: 60px;
+$button-height: 40px;
+$search-height: 50px; 

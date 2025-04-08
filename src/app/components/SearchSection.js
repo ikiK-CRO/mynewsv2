@@ -1,10 +1,10 @@
-import styles from './SearchSection.module.css';
+import styles from './SearchSection.module.scss';
 
 export default function SearchSection() {
   return (
     <div className={styles.searchSection}>
       <div className={styles.logo}>
-        <span style={{ color: '#C81A1A' }}>My</span>News
+        <span style={{ color: '#BB1E1E' }}>My</span>News
       </div>
       <div className={styles.searchWrapper}>
         <svg

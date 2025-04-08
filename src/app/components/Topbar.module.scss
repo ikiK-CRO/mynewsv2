@@ -1,0 +1,63 @@
+@use '../styles/abstracts/variables' as v;
+@use '../styles/abstracts/mixins' as m;
+
+.topbar {
+  position: relative;
+  width: 100%;
+  height: v.$topbar-height;
+  background: {
+    image: url('/Lovepik_com-832643857-Creative tech style gradient line shape vector.png');
+    size: cover;
+    position: center;
+    repeat: no-repeat;
+  }
+
+  &Content {
+    @include m.flex(row, flex-start, center);
+    height: 100%;
+    color: v.$color-white;
+    position: relative;
+  }
+}
+
+.title {
+  @include m.absolute($top: 20px, $left: 0);
+  @include m.font-bold;
+  font-size: v.$font-size-medium;
+  line-height: v.$line-height-large;
+  letter-spacing: -0.136px;
+  color: v.$color-white;
+}
+
+.subtitle {
+  @include m.absolute($top: 20px, $left: 287px);
+  @include m.font-regular;
+  font-size: v.$font-size-small;
+  line-height: v.$line-height-large;
+  letter-spacing: -0.119px;
+  color: v.$color-white;
+}
+
+.rightContent {
+  @include m.absolute($top: 10px, $right: 0);
+  @include m.flex(row, flex-start, center, v.$spacing-lg);
+  height: v.$button-height;
+}
+
+.noThanks {
+  @include m.font-regular;
+  font-size: v.$font-size-medium;
+  line-height: v.$line-height-base;
+  color: v.$color-white;
+}
+
+.getButton {
+  background: v.$color-white;
+  border-radius: v.$border-radius-sm;
+  padding: v.$spacing-sm v.$spacing-md;
+  @include m.font-bold;
+  font-size: v.$font-size-small;
+  line-height: v.$line-height-base;
+  color: v.$color-text;
+  height: v.$button-height;
+} 

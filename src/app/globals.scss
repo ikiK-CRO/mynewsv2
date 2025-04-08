@@ -1,0 +1,35 @@
+// Abstracts
+@use './styles/abstracts/variables' as v;
+@use './styles/abstracts/mixins' as m;
+
+// Base styles
+@use './styles/base/fonts';
+@use './styles/base/reset';
+
+// Global styles
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: v.$font-family-base;
+  background-color: v.$color-background;
+}
+
+body {
+  font-family: v.$font-family-base;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  @include m.container;
+} 

@@ -1,5 +1,4 @@
-import "./globals.css";
-import "./fonts.css";
+import "./globals.scss";
 import Topbar from "./components/Topbar";
 
 export const metadata = {
