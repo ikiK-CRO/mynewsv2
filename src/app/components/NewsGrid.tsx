@@ -3,6 +3,7 @@
 import styles from './NewsGrid.module.scss';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UnifiedArticle } from '../types/news';
+import AdCard from './AdCard';
 
 interface NewsGridProps {
   articles: UnifiedArticle[];
@@ -13,6 +14,7 @@ interface NewsGridProps {
 const INITIAL_VISIBLE_CARDS = 4 + (4 * 3); // 16 cards total (4 in first 2 rows, 12 in next 4 rows)
 const CARDS_TO_LOAD = 6; // Load 6 more cards at a time (2 rows)
 const TOP_GRID_CARDS = 4; // First 4 cards in 2x2 layout
+const AD_FREQUENCY = 6; // Insert ad after every 5th article (appears at position 6, 12, 18)
 
 const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=No+Image';
 
@@ -89,10 +91,33 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
     }));
   };
 
-  // Get visible cards
+  // Function to insert ads at regular intervals
+  const insertAdsIntoArticles = (articles: UnifiedArticle[], adFrequency: number): (UnifiedArticle | 'ad')[] => {
+    const result: (UnifiedArticle | 'ad')[] = [];
+    
+    // Insert an ad after every 'adFrequency' articles
+    for (let i = 0; i < articles.length; i++) {
+      result.push(articles[i]);
+      
+      // Insert an ad after every 6th article (i is 0-indexed, so check for 5, 11, 17, etc.)
+      if ((i + 1) % adFrequency === 0 && i < articles.length - 1) {
+        result.push('ad');
+      }
+    }
+    
+    return result;
+  };
+
+  // Get visible cards with ads inserted
   const visibleArticles = articles.slice(0, visibleCards);
+
+  // Get top and bottom sections without special treatment for breaking news
   const topGridArticles = visibleArticles.slice(0, TOP_GRID_CARDS);
   const bottomGridArticles = visibleArticles.slice(TOP_GRID_CARDS);
+
+  // Only insert ads in the bottom grid to avoid disrupting the 2x2 layout of top grid
+  const bottomGridArticlesWithAds = insertAdsIntoArticles(bottomGridArticles, AD_FREQUENCY);
+
   const hasMoreCards = visibleCards < articles.length;
 
   return (
@@ -132,38 +157,44 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
         ))}
       </div>
       
-      {/* Bottom 3-column grid */}
-      {bottomGridArticles.length > 0 && (
+      {/* Bottom 3-column grid with ads */}
+      {bottomGridArticlesWithAds.length > 0 && (
         <div className={styles.threeColGrid}>
-          {bottomGridArticles.map((article) => (
-            <div key={article.id} className={styles.threeColCard}>
-              <div className={`${styles.newsCard} ${article.category === 'BREAKING' ? styles.breaking : ''}`}>
-                <img 
-                  src={imgErrors[article.id] ? DEFAULT_PLACEHOLDER : article.imageUrl || DEFAULT_PLACEHOLDER} 
-                  alt={article.title} 
-                  className={styles.newsImage}
-                  onError={() => handleImageError(article.id)}
-                />
-                <div className={styles.cardContent}>
-                  <div className={styles.cardHeader}>
-                    {article.category === 'BREAKING' ? (
-                      <span className={styles.breakingTag}>BREAKING</span>
-                    ) : (
-                      <span className={styles.category}>{article.category.toUpperCase()}</span>
-                    )}
-                    <span className={styles.source}>{article.source}</span>
+          {bottomGridArticlesWithAds.map((item, index) => (
+            item === 'ad' ? (
+              <div key={`ad-${index}`} className={styles.threeColCard}>
+                <AdCard />
+              </div>
+            ) : (
+              <div key={item.id} className={styles.threeColCard}>
+                <div className={`${styles.newsCard} ${item.category === 'BREAKING' ? styles.breaking : ''}`}>
+                  <img 
+                    src={imgErrors[item.id] ? DEFAULT_PLACEHOLDER : item.imageUrl || DEFAULT_PLACEHOLDER} 
+                    alt={item.title} 
+                    className={styles.newsImage}
+                    onError={() => handleImageError(item.id)}
+                  />
+                  <div className={styles.cardContent}>
+                    <div className={styles.cardHeader}>
+                      {item.category === 'BREAKING' ? (
+                        <span className={styles.breakingTag}>BREAKING</span>
+                      ) : (
+                        <span className={styles.category}>{item.category.toUpperCase()}</span>
+                      )}
+                      <span className={styles.source}>{item.source}</span>
+                    </div>
+                    <h3 className={styles.title}>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        {item.title}
+                      </a>
+                    </h3>
+                    <p className={styles.author}>
+                      {item.author || 'Unknown'} • {formatDate(item.publishedAt)}
+                    </p>
                   </div>
-                  <h3 className={styles.title}>
-                    <a href={article.url} target="_blank" rel="noopener noreferrer">
-                      {article.title}
-                    </a>
-                  </h3>
-                  <p className={styles.author}>
-                    {article.author || 'Unknown'} • {formatDate(article.publishedAt)}
-                  </p>
                 </div>
               </div>
-            </div>
+            )
           ))}
         </div>
       )}

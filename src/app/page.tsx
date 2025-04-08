@@ -9,6 +9,7 @@ import LatestNews from './components/LatestNews';
 import React from 'react';
 import useNews from './hooks/useNews';
 import { useState, useCallback } from 'react';
+import { UnifiedArticle } from './types/news';
 
 const Home: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('general');
@@ -19,10 +20,34 @@ const Home: React.FC = () => {
     setActiveCategory(category);
   }, []);
 
-  // Combine breaking news with regular articles
-  const combinedArticles = [...breakingNews, ...articles.filter(article => 
-    !breakingNews.some(breaking => breaking.id === article.id)
-  )];
+  // Merge articles and insert breaking news at random positions within first 11 articles
+  const allArticles = React.useMemo(() => {
+    // First, remove any duplicates between breaking news and regular articles
+    const regularArticles = articles.filter(article => 
+      !breakingNews.some(breaking => breaking.id === article.id)
+    );
+    
+    if (breakingNews.length === 0) {
+      return regularArticles;
+    }
+    
+    // Get the first 11 or fewer regular articles
+    const firstArticles = regularArticles.slice(0, 11);
+    const remainingArticles = regularArticles.slice(11);
+    
+    // Create an array to hold the merged results
+    const merged: UnifiedArticle[] = [...firstArticles];
+    
+    // Insert breaking news at random positions within the first set
+    breakingNews.forEach(breakingArticle => {
+      // Limit random position to the current length of merged array
+      const randomPosition = Math.floor(Math.random() * (merged.length + 1));
+      merged.splice(randomPosition, 0, breakingArticle);
+    });
+    
+    // Add remaining articles
+    return [...merged, ...remainingArticles];
+  }, [articles, breakingNews]);
 
   return (
     <main className={styles.container}>
@@ -34,7 +59,7 @@ const Home: React.FC = () => {
         </aside>
         <section className={styles.newsGridContainer}>
           <h2 className={styles.sectionTitle}>News</h2>
-          <NewsGrid articles={combinedArticles} loading={loading} />
+          <NewsGrid articles={allArticles} loading={loading} />
         </section>
         <aside className={styles.latestNewsContainer}>
           <LatestNews latestNews={latestNews} loading={loading} />
