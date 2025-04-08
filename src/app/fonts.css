@@ -2,7 +2,7 @@
 @font-face {
   font-family: 'Inter';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
   src: url('/fonts/InterVariable.woff2') format('woff2');
 }
@@ -10,7 +10,25 @@
 @font-face {
   font-family: 'Inter';
   font-style: italic;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
   src: url('/fonts/InterVariable-Italic.woff2') format('woff2');
+}
+
+/* Bold version */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+}
+
+/* Regular version */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
 } 
