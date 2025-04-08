@@ -11,9 +11,16 @@ export default function Home() {
       <SearchSection />
       <Divider />
       <div className={styles.contentGrid}>
-        <Sidebar />
-        <NewsGrid />
-        <LatestNews />
+        <aside className={styles.sidebarContainer}>
+          <Sidebar />
+        </aside>
+        <section className={styles.newsGridContainer}>
+          <h2 className={styles.sectionTitle}>News</h2>
+          <NewsGrid />
+        </section>
+        <aside className={styles.latestNewsContainer}>
+          <LatestNews />
+        </aside>
       </div>
     </main>
   );

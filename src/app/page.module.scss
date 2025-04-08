@@ -1,20 +1,55 @@
 .container {
-  max-width: 1440px; // Adjust max width as needed
+  max-width: 1100px; // Matching the design's typical container width
   margin: 0 auto;
-  padding: 24px; // Consistent padding
+  padding: 0 16px 24px 16px; // Adjust padding
+}
+
+.sectionTitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #1D1D1B;
+  margin-top: 0px; /* Updated to be 30px from divider */
+  margin-bottom: 16px;
 }
 
 .contentGrid {
   display: grid;
-  grid-template-columns: 63px 1fr auto; // Sidebar width, flexible news grid, auto latest news
-  gap: 32px; // Gap between sections
-  margin-top: 24px; // Space below the divider
+  // Sidebar fixed, News grid flexible but constrained, Latest News fixed width
+  grid-template-columns: 63px minmax(0, 1fr) 321px;
+  gap: 24px; // Adjusted gap to match image better
+  align-items: start; // Align items to the top
 }
 
-// Responsive adjustments if needed
+.sidebarContainer {
+  // No extra styles needed, position is handled by grid
+}
+
+.newsGridContainer {
+  padding-top: 65px; /* Space from divider for cards */
+  margin-top: -65px; /* Negative margin to offset the padding but keep the title properly positioned */
+}
+
+.latestNewsContainer {
+  padding-top: 30px; /* Space from divider for widgets */
+}
+
+// Responsive adjustments
 @media (max-width: 1024px) {
   .contentGrid {
-    grid-template-columns: 1fr; // Stack columns on smaller screens
+    grid-template-columns: 1fr; // Stack columns on medium screens
     gap: 24px;
+  }
+  .sidebarContainer {
+    display: none; // Hide sidebar on smaller screens (or implement mobile nav later)
+  }
+}
+
+@media (max-width: 768px) {
+   .sectionTitle {
+     font-size: 20px;
+   }
+  .latestNewsContainer {
+      grid-row: 2; // Move latest news below grid on small screens
   }
 } 

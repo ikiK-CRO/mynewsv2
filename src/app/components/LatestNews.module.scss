@@ -1,47 +1,72 @@
-@use '../styles/abstracts/variables' as v;
-@use 'sass:color'; // Import the color module
-
 .latestNews {
   background: #FFFFFF;
   border-radius: 8px;
   padding: 24px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  height: fit-content; // Adjust height based on content
+  box-shadow: 0px 1px 2px -1px #C8CAD1;
+  height: fit-content;
 }
 
 .heading {
   display: flex;
   align-items: center;
-  font-size: 18px;
-  font-weight: 600;
-  color: v.$color-text;
-  margin-bottom: 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #1D1D1B;
+  letter-spacing: -0.11px;
+  margin-bottom: 18px;
 }
 
 .icon {
-  width: 12px;
-  height: 12px;
-  background-color: v.$color-primary; // Red icon like in the image
-  border-radius: 50%;
-  margin-right: 10px;
-  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  // Outer lighter circle
+  &::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #BB1E1E;
+    opacity: 0.24;
+    border-radius: 50%;
+  }
+  // Inner darker circle
+  &::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: #BB1E1E;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .newsList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #EEE; // Separator line
+  gap: 0;
+  margin-bottom: 16px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .newsItem {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #EEE; // Separator line between items
+  gap: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid #E8E8E8;
+
+  &:first-child {
+     padding-top: 0;
+  }
 
   &:last-child {
     border-bottom: none;
@@ -50,33 +75,46 @@
 }
 
 .time {
-  font-size: 12px;
-  color: rgba(v.$color-text, 0.5);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: -0.015px;
+  text-transform: uppercase;
+  color: #1E71BB;
+  margin-bottom: 4px;
 }
 
 .titleLink {
-  font-size: 14px;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
-  color: v.$color-text;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: -0.11px;
+  color: #1D1D1B;
   text-decoration: none;
   transition: color 0.2s ease-in-out;
 
   &:hover {
-    color: v.$color-primary;
+    color: #1E71BB;
   }
 }
 
 .seeAllLink {
-  font-size: 14px;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
-  color: v.$color-primary;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.096px;
+  color: #1E71BB;
   text-decoration: none;
-  display: block;
-  text-align: left; // Aligned to left as per image
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   transition: color 0.2s ease-in-out;
+  margin-top: 16px;
 
   &:hover {
-    color: color.adjust(v.$color-primary, $lightness: -10%);
+    color: #1859A0; // Manually darkened version of #1E71BB
   }
 } 
