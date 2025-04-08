@@ -21,10 +21,6 @@
   align-items: start; // Align items to the top
 }
 
-.sidebarContainer {
-  // No extra styles needed, position is handled by grid
-}
-
 .newsGridContainer {
   padding-top: 65px; /* Space from divider for cards */
   margin-top: -65px; /* Negative margin to offset the padding but keep the title properly positioned */
