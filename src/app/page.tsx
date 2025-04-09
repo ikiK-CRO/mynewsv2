@@ -6,12 +6,26 @@ import Divider from './components/Divider';
 import Sidebar from './components/Sidebar';
 import NewsGrid from './components/NewsGrid';
 import LatestNews from './components/LatestNews';
-import React from 'react';
+import React, { useEffect } from 'react';
 import useNews from './hooks/useNews';
 import { useState, useCallback } from 'react';
 import { UnifiedArticle } from './types/news';
 
 const Home: React.FC = () => {
+  // Prevent automatic API calls by detecting the current page
+  // This solves the issue where the homepage component also loads on other pages
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.includes('/favorites')) {
+        console.log('[Home] On favorites page, skipping API calls');
+        window.IS_FAVORITES_PAGE = true;
+      } else {
+        window.IS_FAVORITES_PAGE = false;
+      }
+    }
+  }, []);
+
   const [activeCategory, setActiveCategory] = useState('general');
   const { 
     articles, 

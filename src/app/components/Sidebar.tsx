@@ -101,13 +101,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategor
   const { user } = useAuth();
 
   const handleItemClick = (category: string, requiresAuth: boolean = false, e: React.MouseEvent) => {
+    if (category === 'favorites') {
+      if (!user) {
+        e.preventDefault();
+        router.push('/signin');
+        return;
+      }
+      return;
+    }
+    
     if (requiresAuth && !user) {
       e.preventDefault();
       router.push('/signin');
       return;
     }
     
-    if (onCategoryChange) {
+    if (onCategoryChange && category !== 'favorites') {
       e.preventDefault();
       onCategoryChange(category);
     }

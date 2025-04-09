@@ -17,10 +17,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <AuthProvider>
-          <Topbar />
-          <div className="container">
-            {children}
-          </div>
+        <Topbar />
+        <div className="container">
+          {children}
+        </div>
         </AuthProvider>
       </body>
     </html>

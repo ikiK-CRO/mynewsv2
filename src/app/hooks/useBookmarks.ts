@@ -5,59 +5,108 @@ import { useAuth } from '../context/AuthContext';
 import { getBookmarks, addBookmark, removeBookmark } from '../services/bookmarkService';
 import { UnifiedArticle } from '../types/news';
 
+interface BookmarkedArticle extends UnifiedArticle {
+  bookmarkedAt?: string;
+}
+
 export const useBookmarks = () => {
-  const [bookmarks, setBookmarks] = useState<UnifiedArticle[]>([]);
+  const [bookmarks, setBookmarks] = useState<BookmarkedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchBookmarks = useCallback(async () => {
+    // If no user, reset state and return
     if (!user) {
+      console.log('No authenticated user, clearing bookmarks');
       setBookmarks([]);
       setLoading(false);
-      return;
+      setError(null);
+      return [];
     }
 
     try {
       setLoading(true);
       setError(null);
+      
+      console.log(`Fetching bookmarks for user: ${user.uid}`);
       const fetchedBookmarks = await getBookmarks(user.uid);
+      
+      console.log(`Fetched ${fetchedBookmarks.length} bookmarks`);
+      // Store complete article data including all required fields
       setBookmarks(fetchedBookmarks);
+      
+      return fetchedBookmarks;
     } catch (err: any) {
-      console.error('Error fetching bookmarks:', err);
-      setError(err.message || 'Failed to fetch bookmarks');
+      const errorMessage = err.message || 'Failed to fetch bookmarks';
+      console.error('Error fetching bookmarks:', errorMessage);
+      setError(errorMessage);
+      return [];
     } finally {
       setLoading(false);
     }
   }, [user]);
 
+  // Initial fetch when component mounts or user changes
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
 
   const toggleBookmark = useCallback(async (article: UnifiedArticle) => {
-    if (!user) return false;
+    if (!user) {
+      console.log('Cannot toggle bookmark - no authenticated user');
+      return false;
+    }
+    
+    if (!article || !article.id) {
+      console.error('Invalid article data for bookmark toggle');
+      return false;
+    }
 
     try {
+      setError(null);
       const isBookmarked = bookmarks.some(bookmark => bookmark.id === article.id);
+      console.log(`Toggling bookmark for article ${article.id} - current status: ${isBookmarked ? 'bookmarked' : 'not bookmarked'}`);
       
       if (isBookmarked) {
-        await removeBookmark(user.uid, article.id);
-        setBookmarks(prev => prev.filter(bookmark => bookmark.id !== article.id));
+        // Remove bookmark
+        const success = await removeBookmark(user.uid, article.id);
+        if (success) {
+          setBookmarks(prev => prev.filter(bookmark => bookmark.id !== article.id));
+          console.log('Bookmark removed successfully');
+        } else {
+          console.error('Failed to remove bookmark');
+          return false;
+        }
       } else {
-        await addBookmark(user.uid, article);
-        setBookmarks(prev => [...prev, { ...article, bookmarkedAt: new Date().toISOString() }]);
+        // Add bookmark - store complete article data
+        const success = await addBookmark(user.uid, article);
+        if (success) {
+          // Create a complete article object with all necessary data
+          const bookmarkedArticle = { 
+            ...article, 
+            bookmarkedAt: new Date().toISOString() 
+          } as BookmarkedArticle;
+          
+          setBookmarks(prev => [...prev, bookmarkedArticle]);
+          console.log('Bookmark added successfully');
+        } else {
+          console.error('Failed to add bookmark');
+          return false;
+        }
       }
       
       return true;
     } catch (err: any) {
-      console.error('Error toggling bookmark:', err);
-      setError(err.message || 'Failed to toggle bookmark');
+      const errorMessage = err.message || 'Failed to toggle bookmark';
+      console.error('Error toggling bookmark:', errorMessage);
+      setError(errorMessage);
       return false;
     }
   }, [bookmarks, user]);
 
   const isArticleBookmarked = useCallback((articleId: string) => {
+    if (!articleId || !bookmarks.length) return false;
     return bookmarks.some(bookmark => bookmark.id === articleId);
   }, [bookmarks]);
 

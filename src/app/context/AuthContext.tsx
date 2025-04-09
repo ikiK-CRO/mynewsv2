@@ -20,6 +20,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<UserCredential>;
   logOut: () => Promise<void>;
   error: string | null;
+  isEmailVerified: boolean;
+  resendVerificationEmail: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,10 +42,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      setIsEmailVerified(user?.emailVerified || false);
       setLoading(false);
     });
 
@@ -74,6 +78,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if email is verified
+      setIsEmailVerified(userCredential.user.emailVerified);
+      
+      if (!userCredential.user.emailVerified) {
+        console.log('Warning: Email is not verified');
+      }
+      
       return userCredential;
     } catch (error: any) {
       setError(error.message);
@@ -90,6 +102,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error;
     }
   };
+  
+  const resendVerificationEmail = async () => {
+    try {
+      if (!user) {
+        throw new Error('No user is logged in');
+      }
+      
+      await sendEmailVerification(user);
+      return;
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
+  };
 
   const value = {
     user,
@@ -97,7 +123,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUp,
     signIn,
     logOut,
-    error
+    error,
+    isEmailVerified,
+    resendVerificationEmail
   };
 
   return (

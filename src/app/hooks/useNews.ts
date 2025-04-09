@@ -130,6 +130,13 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
 
   // Fetch news when the category changes
   useEffect(() => {
+    // Skip API calls when we're on the favorites page 
+    if (typeof window !== 'undefined' && window.IS_FAVORITES_PAGE) {
+      console.log('[useNews] Skipping API calls on favorites page');
+      setLoading(false);
+      return;
+    }
+    
     fetchNews();
   }, [category]);
 

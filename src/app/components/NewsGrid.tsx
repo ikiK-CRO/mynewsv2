@@ -26,6 +26,22 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
+  // Log the articles received from props on mount and when they change
+  useEffect(() => {
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    console.log(`[NewsGrid] ${currentPath} received ${articles.length} articles`);
+    
+    if (articles.length > 0) {
+      console.log('[NewsGrid] First few articles:', articles.slice(0, 3).map(a => ({
+        id: a.id,
+        title: a.title,
+        source: a.source
+      })));
+    } else {
+      console.log('[NewsGrid] No articles received');
+    }
+  }, [articles]);
+
   const loadMoreCards = useCallback(() => {
     if (isLoading || visibleCards >= articles.length) return;
     
@@ -135,6 +151,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
               alt={article.title} 
               className={styles.newsImage}
               onError={() => handleImageError(article.id)}
+              loading="lazy"
             />
             <BookmarkButton article={article} />
             <div className={styles.cardContent}>
@@ -175,6 +192,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
                     alt={item.title} 
                     className={styles.newsImage}
                     onError={() => handleImageError(item.id)}
+                    loading="lazy"
                   />
                   <BookmarkButton article={item} />
                   <div className={styles.cardContent}>

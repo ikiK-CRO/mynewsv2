@@ -21,6 +21,16 @@
   text-align: center;
 }
 
+.logoLink {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
 .logo {
   @include m.font-black;
   font-size: 32px;
@@ -142,12 +152,36 @@
   text-decoration: underline;
 }
 
-.logoLink {
-  display: inline-block;
-  text-decoration: none;
-  transition: transform 0.2s ease;
+.verificationInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.emailIcon {
+  color: v.$color-primary;
+  margin-bottom: 1.5rem;
+}
+
+.verificationSteps {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  text-align: left;
   
-  &:hover {
-    transform: scale(1.05);
+  ol {
+    margin: 0;
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.75rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 } 

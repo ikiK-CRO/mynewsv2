@@ -21,6 +21,16 @@
   text-align: center;
 }
 
+.logoLink {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
 .logo {
   @include m.font-black;
   font-size: 32px;
@@ -128,14 +138,4 @@
 .link:hover {
   color: color.adjust(v.$color-primary, $lightness: -10%);
   text-decoration: underline;
-}
-
-.logoLink {
-  display: inline-block;
-  text-decoration: none;
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: scale(1.05);
-  }
 } 

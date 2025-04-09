@@ -1,5 +1,6 @@
 @use '../styles/abstracts/variables' as v;
 @use '../styles/abstracts/mixins' as m;
+@use 'sass:color';
 
 .topbar {
   position: relative;
@@ -11,13 +12,13 @@
     position: center;
     repeat: no-repeat;
   }
+}
 
-  &Content {
-    @include m.flex(row, flex-start, center);
-    height: 100%;
-    color: v.$color-white;
-    position: relative;
-  }
+.topbarContent {
+  @include m.flex(row, flex-start, center);
+  height: 100%;
+  color: v.$color-white;
+  position: relative;
 }
 
 .title {
@@ -60,4 +61,23 @@
   line-height: v.$line-height-base;
   color: v.$color-text;
   height: v.$button-height;
+}
+
+.authButton {
+  @include m.absolute($top: 10px, $right: 280px);
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: v.$color-white;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: color.adjust(v.$color-white, $alpha: -0.8);
+  }
 } 

@@ -81,10 +81,24 @@ const SignUp: React.FC = () => {
             </div>
           </Link>
           
-          <h1 className={styles.title}>Email Verification Sent</h1>
-          <p className={styles.subtitle}>
-            We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.
-          </p>
+          <h1 className={styles.title}>Email Verification Required</h1>
+          <div className={styles.verificationInfo}>
+            <svg className={styles.emailIcon} xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <p className={styles.subtitle}>
+              We've sent a verification link to your email address.<br />
+              <strong>You must verify your email before you can use all features.</strong>
+            </p>
+            <div className={styles.verificationSteps}>
+              <ol>
+                <li>Check your inbox (and spam folder)</li>
+                <li>Click the verification link in the email</li>
+                <li>Return to sign in after verification</li>
+              </ol>
+            </div>
+          </div>
           <div className={styles.links}>
             <Link href="/signin" className={styles.link}>Return to Sign In</Link>
           </div>
@@ -103,7 +117,7 @@ const SignUp: React.FC = () => {
         </Link>
         
         <h1 className={styles.title}>Create an Account</h1>
-        <p className={styles.subtitle}>Sign up to save your favorite articles</p>
+        <p className={styles.subtitle}>Sign up to save your favorite articles<br /><small>Email verification will be required</small></p>
         
         {error && <div className={styles.error}>{error}</div>}
         
