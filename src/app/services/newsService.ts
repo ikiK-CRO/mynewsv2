@@ -18,32 +18,103 @@ function combineAndDeduplicate(arrays: UnifiedArticle[][]): UnifiedArticle[] {
   });
 }
 
-export async function getLatestNews(): Promise<UnifiedArticle[]> {
-  // For the latest news widget, use NY Times most popular (last 1 day)
+export async function getLatestNews(page: number = 1, pageSize: number = 20): Promise<UnifiedArticle[]> {
+  // Combine multiple news sources for a more comprehensive latest news feed
   try {
-    const articles = await getMostPopularArticles(1);
+    // Fetch from multiple sources in parallel
+    const results = await Promise.allSettled([
+      // NY Times - Most popular viewed in last 7 days
+      getMostPopularArticles(7),
+      // NY Times - Top stories from home section
+      getTopStoriesBySection('home'),
+      // NY Times - Top stories from world section (additional content)
+      getTopStoriesBySection('world'),
+      // NY Times - Additional sections for more variety
+      getTopStoriesBySection('science'),
+      getTopStoriesBySection('arts'),
+      // NewsAPI - Top headlines (general category)
+      getTopHeadlinesByCategory('general'),
+      // NewsAPI - Top headlines (technology category for more variety)
+      getTopHeadlinesByCategory('technology'),
+      // NewsAPI - Additional categories
+      getTopHeadlinesByCategory('business'),
+      getTopHeadlinesByCategory('entertainment')
+    ]);
     
-    // If NY Times fails or returns no articles, fall back to NewsAPI
-    if (articles.length === 0) {
-      console.log('Falling back to NewsAPI for latest news');
-      const newsApiArticles = await getTopHeadlinesByCategory();
-      return newsApiArticles.slice(0, 5);
-    }
+    // Collect all successful results
+    const allArticles: UnifiedArticle[] = [];
     
-    // Return the top 5 most popular articles
-    return articles.slice(0, 5);
-  } catch (error) {
-    console.error('Error fetching latest news:', error);
+    results.forEach(result => {
+      if (result.status === 'fulfilled' && result.value.length > 0) {
+        allArticles.push(...result.value);
+      }
+    });
     
-    // Fallback to NewsAPI if NY Times fails
-    try {
-      console.log('Falling back to NewsAPI for latest news after error');
-      const newsApiArticles = await getTopHeadlinesByCategory();
-      return newsApiArticles.slice(0, 5);
-    } catch (fallbackError) {
-      console.error('Fallback also failed:', fallbackError);
+    if (allArticles.length === 0) {
+      console.error('All news sources failed to return articles');
       return [];
     }
+    
+    // Deduplicate articles
+    const seen = new Set<string>();
+    const uniqueArticles = allArticles.filter(article => {
+      // Use title + source as a unique key to allow different sources to cover the same story
+      const key = `${article.title.toLowerCase().trim()}-${article.source}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+    
+    // Sort by published date, newest first
+    const sortedArticles = uniqueArticles.sort((a, b) => 
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
+    
+    // Group articles by date for better organization
+    const articlesByDate = sortedArticles.reduce((groups, article) => {
+      const date = new Date(article.publishedAt).toDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(article);
+      return groups;
+    }, {} as Record<string, UnifiedArticle[]>);
+    
+    // Flatten grouped articles, maintaining date order
+    const dates = Object.keys(articlesByDate).sort((a, b) => 
+      new Date(b).getTime() - new Date(a).getTime()
+    );
+    
+    // Ensure we have at least 10 articles per day where possible
+    const flattenedArticles = dates.flatMap(date => articlesByDate[date]);
+    
+    // Calculate pagination
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    
+    // For debugging
+    console.log(`Fetching latest news page ${page}, items ${start}-${end} of ${flattenedArticles.length}`);
+    
+    // Only return empty array if we're past the total items
+    if (start >= flattenedArticles.length) {
+      return [];
+    }
+    
+    // Return the paginated slice with unique IDs
+    return flattenedArticles.slice(start, end).map((article, index) => {
+      if (!article.id) {
+        return {
+          ...article,
+          id: `article-${start + index}-${Date.now()}`
+        };
+      }
+      return article;
+    });
+  } catch (error) {
+    console.error('Error fetching latest news:', error);
+    return [];
   }
 }
 

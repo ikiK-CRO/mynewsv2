@@ -154,4 +154,44 @@
   &:hover {
     color: #1859A0; // Manually darkened version of #1E71BB
   }
+}
+
+.loadMoreIndicator {
+  padding: 8px 0;
+  text-align: center;
+  height: 24px;
+}
+
+.loadingDots {
+  display: inline-block;
+  font-size: 12px;
+  color: #6B6B6B;
+  position: relative;
+  
+  &:after {
+    content: '...';
+    animation: loadingDots 1.5s infinite;
+    position: absolute;
+    left: 100%;
+  }
+}
+
+@keyframes loadingDots {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.loadMoreButton {
+  background-color: transparent;
+  color: #1E71BB;
+  border: none;
+  font-size: 12px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 } 

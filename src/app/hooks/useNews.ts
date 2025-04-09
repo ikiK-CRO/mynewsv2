@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UnifiedArticle } from '../types/news';
 import { getLatestNews, getNewsByCategory, getBreakingNews } from '../services/newsService';
 
@@ -9,6 +9,9 @@ interface UseNewsReturn {
   loading: boolean;
   error: Error | null;
   refreshNews: () => Promise<void>;
+  loadMoreLatestNews: () => Promise<void>;
+  latestNewsLoading: boolean;
+  hasMoreLatestNews: boolean;
 }
 
 export default function useNews(category: string = 'general'): UseNewsReturn {
@@ -17,6 +20,11 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
   const [breakingNews, setBreakingNews] = useState<UnifiedArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // Pagination state for latest news
+  const [latestNewsPage, setLatestNewsPage] = useState<number>(1);
+  const [latestNewsLoading, setLatestNewsLoading] = useState<boolean>(false);
+  const [hasMoreLatestNews, setHasMoreLatestNews] = useState<boolean>(true);
 
   const fetchNews = async () => {
     setLoading(true);
@@ -26,13 +34,17 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
       // Fetch all data in parallel
       const [categoryArticles, latest, breaking] = await Promise.all([
         getNewsByCategory(category),
-        getLatestNews(),
+        getLatestNews(1), // Reset to page 1
         getBreakingNews()
       ]);
       
       setArticles(categoryArticles);
       setLatestNews(latest);
       setBreakingNews(breaking);
+      
+      // Reset pagination state
+      setLatestNewsPage(1);
+      setHasMoreLatestNews(latest.length > 0);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An error occurred fetching news'));
       console.error('Error in useNews hook:', err);
@@ -40,6 +52,33 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
       setLoading(false);
     }
   };
+
+  // Function to load more latest news
+  const loadMoreLatestNews = useCallback(async () => {
+    if (latestNewsLoading || !hasMoreLatestNews) return;
+    
+    setLatestNewsLoading(true);
+    try {
+      const nextPage = latestNewsPage + 1;
+      const moreLatestNews = await getLatestNews(nextPage);
+      
+      if (moreLatestNews.length === 0) {
+        setHasMoreLatestNews(false);
+      } else {
+        setLatestNewsPage(nextPage);
+        // Ensure we don't add duplicate articles
+        setLatestNews(prev => {
+          const prevIds = new Set(prev.map(article => article.id));
+          const uniqueNewArticles = moreLatestNews.filter(article => !prevIds.has(article.id));
+          return [...prev, ...uniqueNewArticles];
+        });
+      }
+    } catch (err) {
+      console.error('Error loading more latest news:', err);
+    } finally {
+      setLatestNewsLoading(false);
+    }
+  }, [latestNewsPage, latestNewsLoading, hasMoreLatestNews]);
 
   // Fetch news when the category changes
   useEffect(() => {
@@ -57,6 +96,9 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
     breakingNews,
     loading,
     error,
-    refreshNews
+    refreshNews,
+    loadMoreLatestNews,
+    latestNewsLoading,
+    hasMoreLatestNews
   };
 } 

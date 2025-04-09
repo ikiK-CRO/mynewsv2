@@ -13,7 +13,16 @@ import { UnifiedArticle } from './types/news';
 
 const Home: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('general');
-  const { articles, latestNews, breakingNews, loading, error } = useNews(activeCategory);
+  const { 
+    articles, 
+    latestNews, 
+    breakingNews, 
+    loading, 
+    error, 
+    loadMoreLatestNews,
+    latestNewsLoading,
+    hasMoreLatestNews
+  } = useNews(activeCategory);
 
   // Handle category change when a sidebar item is clicked
   const handleCategoryChange = useCallback((category: string) => {
@@ -62,7 +71,13 @@ const Home: React.FC = () => {
           <NewsGrid articles={allArticles} loading={loading} />
         </section>
         <aside className={styles.latestNewsContainer}>
-          <LatestNews latestNews={latestNews} loading={loading} />
+          <LatestNews 
+            latestNews={latestNews} 
+            loading={loading} 
+            loadMoreLatestNews={loadMoreLatestNews}
+            latestNewsLoading={latestNewsLoading}
+            hasMoreLatestNews={hasMoreLatestNews}
+          />
         </aside>
       </div>
     </main>
