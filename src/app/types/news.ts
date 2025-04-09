@@ -101,6 +101,39 @@ export interface NYTimesTopStoriesResponse {
   results: NYTimesTopStoryArticle[];
 }
 
+// NYTimes Newswire API interfaces
+export interface NYTimesNewswireArticle {
+  section: string;
+  subsection: string;
+  title: string;
+  abstract: string;
+  url: string;
+  uri: string;
+  byline: string;
+  thumbnail_standard: string;
+  item_type: string;
+  source: string;
+  updated_date: string;
+  created_date: string;
+  published_date: string;
+  material_type_facet: string;
+  kicker: string;
+  headline: string;
+  des_facet: string[] | string;
+  org_facet: string[] | string;
+  per_facet: string[] | string;
+  geo_facet: string[] | string;
+  multimedia: NYTimesMultimedia[];
+  short_url: string;
+}
+
+export interface NYTimesNewswireResponse {
+  status: string;
+  copyright: string;
+  num_results: number;
+  results: NYTimesNewswireArticle[];
+}
+
 // Unified article type for our app
 export interface UnifiedArticle {
   id: string;

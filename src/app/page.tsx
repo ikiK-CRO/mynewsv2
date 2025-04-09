@@ -55,7 +55,18 @@ const Home: React.FC = () => {
     });
     
     // Add remaining articles
-    return [...merged, ...remainingArticles];
+    const allMerged = [...merged, ...remainingArticles];
+    
+    // Re-sort non-breaking news articles by date (newest first)
+    // Breaking news items will stay at their inserted positions
+    return allMerged.sort((a, b) => {
+      // Skip sorting for breaking news items (keep them at their special positions)
+      if (a.category === 'BREAKING' || b.category === 'BREAKING') {
+        return 0;
+      }
+      // Otherwise sort by date
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
   }, [articles, breakingNews]);
 
   return (

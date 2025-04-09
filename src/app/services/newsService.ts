@@ -1,6 +1,10 @@
 import { UnifiedArticle } from '../types/news';
 import { getTopHeadlinesByCategory } from './newsApi';
-import { getMostPopularArticles, getTopStoriesBySection } from './nyTimesApi';
+import { 
+  getMostPopularArticles, 
+  getTopStoriesBySection, 
+  getNewswireArticles 
+} from './nyTimesApi';
 
 // Combine and deduplicate articles from multiple sources
 function combineAndDeduplicate(arrays: UnifiedArticle[][]): UnifiedArticle[] {
@@ -23,6 +27,8 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
   try {
     // Fetch from multiple sources in parallel
     const results = await Promise.allSettled([
+      // NY Times Newswire API - Latest published content (most real-time)
+      getNewswireArticles('all', 'all', 20, 0),
       // NY Times - Most popular viewed in last 7 days
       getMostPopularArticles(7),
       // NY Times - Top stories from home section
@@ -123,10 +129,11 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
     // Map our app categories to NYTimes sections
     const nyTimesSection = category === 'general' ? 'home' : category;
     
-    // Attempt to fetch from both sources, but handle individual failures
+    // Attempt to fetch from all sources, but handle individual failures
     const results = await Promise.allSettled([
       getTopHeadlinesByCategory(category),
-      getTopStoriesBySection(nyTimesSection)
+      getTopStoriesBySection(nyTimesSection),
+      getNewswireArticles('all', nyTimesSection, 20, 0) // Add Newswire API for real-time articles
     ]);
     
     const successfulResults: UnifiedArticle[][] = [];
@@ -141,12 +148,24 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
     if (results[1].status === 'fulfilled') {
       successfulResults.push(results[1].value);
     } else {
-      console.error('NY Times request failed:', results[1].reason);
+      console.error('NY Times Top Stories request failed:', results[1].reason);
+    }
+    
+    if (results[2].status === 'fulfilled') {
+      successfulResults.push(results[2].value);
+    } else {
+      console.error('NY Times Newswire request failed:', results[2].reason);
     }
     
     // As long as at least one API succeeded, we can show some results
     if (successfulResults.length > 0) {
-      return combineAndDeduplicate(successfulResults);
+      // Get deduplicated articles
+      const dedupedArticles = combineAndDeduplicate(successfulResults);
+      
+      // Sort articles by published date, newest first
+      return dedupedArticles.sort((a, b) => 
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      );
     }
     
     // If everything failed, return empty array
@@ -160,10 +179,11 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
 
 export async function getBreakingNews(): Promise<UnifiedArticle[]> {
   try {
-    // Fetch from both sources in parallel
+    // Fetch from all sources in parallel
     const results = await Promise.allSettled([
       getTopHeadlinesByCategory(), // NewsAPI
-      getTopStoriesBySection('home') // NY Times
+      getTopStoriesBySection('home'), // NY Times Top Stories
+      getNewswireArticles('all', 'all', 5, 0) // NY Times Newswire for real-time breaking news
     ]);
     
     const breakingNews: UnifiedArticle[] = [];
@@ -176,7 +196,7 @@ export async function getBreakingNews(): Promise<UnifiedArticle[]> {
       });
     }
     
-    // Add top article from NY Times if successful
+    // Add top article from NY Times Top Stories if successful
     if (results[1].status === 'fulfilled' && results[1].value.length > 0) {
       breakingNews.push({
         ...results[1].value[0],
@@ -184,7 +204,15 @@ export async function getBreakingNews(): Promise<UnifiedArticle[]> {
       });
     }
     
-    // If both APIs failed, return empty array
+    // Add latest article from NY Times Newswire if successful
+    if (results[2].status === 'fulfilled' && results[2].value.length > 0) {
+      breakingNews.push({
+        ...results[2].value[0],
+        category: 'BREAKING'
+      });
+    }
+    
+    // If all APIs failed, return empty array
     if (breakingNews.length === 0) {
       console.error('Failed to fetch breaking news from any source');
     }
