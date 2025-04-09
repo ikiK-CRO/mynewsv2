@@ -33,13 +33,29 @@ const Home: React.FC = () => {
   useEffect(() => {
     console.log('[Home] Component mounted with category:', activeCategory);
     
-    // Optional: Force refresh if needed on initial navigation
-    // refreshNews();
+    // Check for pending category from Favorites page navigation
+    try {
+      const pendingCategory = localStorage.getItem('pending_category');
+      if (pendingCategory) {
+        console.log('[Home] Found pending category from navigation:', pendingCategory);
+        
+        // Clear the pending category immediately to prevent future triggers
+        localStorage.removeItem('pending_category');
+        
+        // Set the active category if it's different
+        if (pendingCategory !== activeCategory) {
+          console.log('[Home] Applying pending category:', pendingCategory);
+          setActiveCategory(pendingCategory);
+        }
+      }
+    } catch (err) {
+      console.error('[Home] Error checking pending category:', err);
+    }
     
     return () => {
       console.log('[Home] Component unmounted');
     };
-  }, [activeCategory]);
+  }, [activeCategory, setActiveCategory]);
 
   // Handle category change when a sidebar item is clicked
   const handleCategoryChange = useCallback((category: string) => {

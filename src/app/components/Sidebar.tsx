@@ -120,8 +120,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategor
       return;
     }
     
-    // Handle category changes - prevent default navigation and use the callback
+    // Check if we're on the Favorites page
+    const isOnFavoritesPage = typeof window !== 'undefined' && window.location.pathname.includes('/favorites');
+    
+    // When on Favorites page and clicking any category, always handle navigation manually
+    if (isOnFavoritesPage) {
+      e.preventDefault();
+      console.log('[Sidebar] On favorites page, navigating to home with category:', category);
+      
+      // Store the category in localStorage before navigation
+      localStorage.setItem('pending_category', category);
+      
+      // Navigate to home page
+      router.push('/');
+      return;
+    }
+    
+    // Handle category changes on non-favorites pages
     if (onCategoryChange && category !== activeCategory) {
+      // Always prevent default to handle navigation manually
       e.preventDefault();
       console.log(`[Sidebar] Category change requested: ${category}`);
       onCategoryChange(category);
