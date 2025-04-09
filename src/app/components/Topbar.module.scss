@@ -64,7 +64,6 @@
 }
 
 .authButton {
-  @include m.absolute($top: 10px, $right: 280px);
   background: transparent;
   border: none;
   width: 40px;

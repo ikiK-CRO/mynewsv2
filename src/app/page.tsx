@@ -10,6 +10,8 @@ import React, { useEffect } from 'react';
 import useNews from './hooks/useNews';
 import { useState, useCallback } from 'react';
 import { UnifiedArticle } from './types/news';
+import { useRouter } from 'next/navigation';
+import { useAuth } from './context/AuthContext';
 
 const Home: React.FC = () => {
   // Prevent automatic API calls by detecting the current page
@@ -42,6 +44,9 @@ const Home: React.FC = () => {
     searchNews,
     clearSearch
   } = useNews(activeCategory);
+
+  const router = useRouter();
+  const { user, logOut } = useAuth();
 
   // Handle category change when a sidebar item is clicked
   const handleCategoryChange = useCallback((category: string) => {

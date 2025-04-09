@@ -30,8 +30,6 @@
 .newsGridContainer {
   grid-column: 2;
   grid-row: 1 / span 3;
-  padding-top: 65px; /* Space from divider for cards */
-  margin-top: -65px; /* Negative margin to offset the padding but keep the title properly positioned */
 }
 
 .latestNewsContainer {
