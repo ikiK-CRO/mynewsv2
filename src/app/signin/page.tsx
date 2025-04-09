@@ -16,6 +16,18 @@ const SignIn: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      // Mark return navigation in localStorage for better persistence
+      try {
+        localStorage.setItem('news_navigation_state', JSON.stringify({
+          from_signin: true,
+          timestamp: Date.now()
+        }));
+        console.log('[SignIn] Setting navigation flag in localStorage before redirect');
+      } catch (err) {
+        console.error('[SignIn] Error setting localStorage:', err);
+      }
+      
+      // Navigate to home page
       router.push('/');
     }
   }, [user, router]);
@@ -32,7 +44,9 @@ const SignIn: React.FC = () => {
       setError(null);
       setLoading(true);
       await signIn(email, password);
-      router.push('/');
+      
+      // Login is successful - the useEffect above will handle redirect
+      // Cache clearing will happen in the useEffect
     } catch (err: any) {
       console.error('Sign in error:', err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {

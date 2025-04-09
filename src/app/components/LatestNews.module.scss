@@ -179,29 +179,44 @@
 }
 
 .loadMoreIndicator {
-  padding: 8px 0;
-  text-align: center;
-  height: 24px;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  min-height: 30px;
+}
+
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
 }
 
 .loadingDots {
   display: inline-block;
-  font-size: 12px;
-  color: #6B6B6B;
   position: relative;
+  width: 40px;
+  text-align: center;
+  color: #888;
+  font-size: 0.8rem;
   
-  &:after {
-    content: '...';
+  &::after {
+    content: "...";
     animation: loadingDots 1.5s infinite;
-    position: absolute;
-    left: 100%;
   }
 }
 
 @keyframes loadingDots {
-  0% { opacity: 0.2; }
-  20% { opacity: 1; }
-  100% { opacity: 0.2; }
+  0%, 20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60%, 100% {
+    content: "...";
+  }
 }
 
 .loadMoreButton {

@@ -10,19 +10,6 @@ import NewsGrid from '../components/NewsGrid';
 import Sidebar from '../components/Sidebar';
 import Divider from '../components/Divider';
 
-// Extend Window interface to add our custom property
-declare global {
-  interface Window {
-    IS_FAVORITES_PAGE?: boolean;
-  }
-}
-
-// Add this to the top of the file to indicate this is a favorites page
-// This will help debugging and could be used by other components
-if (typeof window !== 'undefined') {
-  window.IS_FAVORITES_PAGE = true;
-}
-
 const FavoritesPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -69,6 +56,22 @@ const FavoritesPage: React.FC = () => {
       fetchBookmarks();
     }
   }, [user, authLoading, router]);
+
+  // Set navigation flag when leaving the page
+  useEffect(() => {
+    return () => {
+      // Set a flag for the home page to detect navigation from favorites
+      try {
+        localStorage.setItem('news_navigation_state', JSON.stringify({
+          from_favorites: true,
+          timestamp: Date.now()
+        }));
+        console.log('[Favorites] Setting navigation flag in localStorage before unmount');
+      } catch (err) {
+        console.error('[Favorites] Error setting localStorage:', err);
+      }
+    };
+  }, []);
 
   if (authLoading) {
     return <div className={styles.loading}>Loading...</div>;

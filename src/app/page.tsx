@@ -6,35 +6,18 @@ import Divider from './components/Divider';
 import Sidebar from './components/Sidebar';
 import NewsGrid from './components/NewsGrid';
 import LatestNews from './components/LatestNews';
-import React, { useEffect } from 'react';
-import useNews from './hooks/useNews';
-import { useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
+import { useNews } from './context/NewsContext';
 import { UnifiedArticle } from './types/news';
-import { useRouter } from 'next/navigation';
-import { useAuth } from './context/AuthContext';
 
 const Home: React.FC = () => {
-  // Prevent automatic API calls by detecting the current page
-  // This solves the issue where the homepage component also loads on other pages
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      if (path.includes('/favorites')) {
-        console.log('[Home] On favorites page, skipping API calls');
-        window.IS_FAVORITES_PAGE = true;
-      } else {
-        window.IS_FAVORITES_PAGE = false;
-      }
-    }
-  }, []);
-
-  const [activeCategory, setActiveCategory] = useState('general');
   const { 
     articles, 
     latestNews, 
     breakingNews, 
     loading, 
-    error,
+    activeCategory,
+    setActiveCategory,
     loadMoreLatestNews,
     latestNewsLoading,
     hasMoreLatestNews,
@@ -42,18 +25,38 @@ const Home: React.FC = () => {
     searchLoading,
     searchTerm,
     searchNews,
-    clearSearch
-  } = useNews(activeCategory);
+    clearSearch,
+    refreshNews
+  } = useNews();
 
-  const router = useRouter();
-  const { user, logOut } = useAuth();
+  // Log navigation to this page
+  useEffect(() => {
+    console.log('[Home] Component mounted with category:', activeCategory);
+    
+    // Optional: Force refresh if needed on initial navigation
+    // refreshNews();
+    
+    return () => {
+      console.log('[Home] Component unmounted');
+    };
+  }, [activeCategory]);
 
   // Handle category change when a sidebar item is clicked
   const handleCategoryChange = useCallback((category: string) => {
+    // Skip if it's the same category
+    if (category === activeCategory) {
+      console.log(`[Home] Category ${category} already active, skipping change`);
+      return;
+    }
+    
+    console.log(`[Home] Changing category from ${activeCategory} to ${category}`);
+    
+    // Change the active category - this will trigger the useEffect in NewsContext
     setActiveCategory(category);
+    
     // Clear search when changing categories
     clearSearch();
-  }, [clearSearch]);
+  }, [clearSearch, activeCategory, setActiveCategory]);
 
   // Handle search
   const handleSearch = useCallback((term: string) => {
@@ -64,15 +67,21 @@ const Home: React.FC = () => {
   const allArticles = React.useMemo(() => {
     // If there's an active search, return search results
     if (searchTerm) {
-      return searchResults;
+      return searchResults || [];
     }
 
-    // First, remove any duplicates between breaking news and regular articles
+    // First, ensure articles array exists
+    if (!articles || articles.length === 0) {
+      console.log('[Home] No articles available for display');
+      return [];
+    }
+
+    // Remove any duplicates between breaking news and regular articles
     const regularArticles = articles.filter(article => 
       !breakingNews.some(breaking => breaking.id === article.id)
     );
     
-    if (breakingNews.length === 0) {
+    if (!breakingNews || breakingNews.length === 0) {
       return regularArticles;
     }
     

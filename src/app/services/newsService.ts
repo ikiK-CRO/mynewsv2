@@ -153,6 +153,8 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
     // Map our app categories to NYTimes sections
     const nyTimesSection = category === 'general' ? 'home' : category;
     
+    console.log(`[newsService] Fetching news for category: ${category}, NYT section: ${nyTimesSection}`);
+    
     // Attempt to fetch from both sources for diversity, but limit to 2 API calls
     const results = await Promise.allSettled([
       getTopHeadlinesByCategory(category),
@@ -181,19 +183,49 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
       // Get deduplicated articles
       const dedupedArticles = combineAndDeduplicate(successfulResults);
       
+      console.log(`[newsService] Got ${dedupedArticles.length} deduplicated articles for category ${category}`);
+      
+      // If we end up with an empty array, throw an error to trigger fallback
+      if (dedupedArticles.length === 0) {
+        throw new Error(`No articles found for category ${category} after deduplication`);
+      }
+      
       // Sort articles by published date, newest first
       return dedupedArticles.sort((a, b) => 
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
       );
     }
     
-    // If everything failed, return empty array
-    console.error('All news sources failed for category:', category);
-    return [];
+    // If everything failed, throw an error to trigger fallback
+    throw new Error(`All news sources failed for category: ${category}`);
   } catch (error) {
     console.error(`Error fetching news for category ${category}:`, error);
-    return [];
+    
+    // Return fallback data if we have no articles
+    return getLocalFallbackData(category);
   }
+}
+
+/**
+ * Provides fallback data when API calls fail
+ */
+function getLocalFallbackData(category: string): UnifiedArticle[] {
+  console.log(`[newsService] Using fallback data for ${category}`);
+  
+  // Return a simple placeholder article
+  return [
+    {
+      id: `fallback-${Date.now()}`,
+      title: `Unable to load news for ${category}`,
+      description: 'Please check your internet connection and try again later.',
+      url: '#',
+      imageUrl: 'https://via.placeholder.com/440x293/E8E8E8/AAAAAA?text=News+Service+Error',
+      publishedAt: new Date().toISOString(),
+      source: 'News Service',
+      author: 'System',
+      category: category
+    }
+  ];
 }
 
 /**

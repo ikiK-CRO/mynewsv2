@@ -1,7 +1,7 @@
 'use client';
 
 import styles from './NewsGrid.module.scss';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { UnifiedArticle } from '../types/news';
 import AdCard from './AdCard';
 import BookmarkButton from './BookmarkButton';
@@ -26,12 +26,37 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
+  // IMPORTANT: Update the visibleArticles useMemo to be called unconditionally
+  // This must come before other hooks to maintain hook ordering
+  const visibleArticles = useMemo(() => {
+    // Add a check at the beginning of the component to better handle empty article arrays
+    console.log(`[NewsGrid] / received ${articles?.length || 0} articles`);
+    
+    if (!articles || articles.length === 0) {
+      console.log('[NewsGrid] No articles to display in useMemo');
+      return [];
+    }
+    
+    try {
+      console.log('[NewsGrid DEBUG] Articles array changed, length:', articles.length);
+      return articles.slice(0, visibleCards);
+    } catch (error) {
+      console.error('[NewsGrid] Error processing articles in useMemo:', error);
+      return [];
+    }
+  }, [articles, visibleCards]);
+  
+  // Only log the "No articles received" message if we're not in a loading state
+  if (articles?.length === 0 && !loading) {
+    console.log('[NewsGrid] No articles received');
+  }
+
   // Log the articles received from props on mount and when they change
   useEffect(() => {
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-    console.log(`[NewsGrid] ${currentPath} received ${articles.length} articles`);
+    console.log(`[NewsGrid] ${currentPath} received ${articles?.length || 0} articles`);
     
-    if (articles.length > 0) {
+    if (articles?.length > 0) {
       console.log('[NewsGrid] First few articles:', articles.slice(0, 3).map(a => ({
         id: a.id,
         title: a.title,
@@ -42,38 +67,139 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
     }
   }, [articles]);
 
+  // Add debug log to monitor when articles array changes
+  useEffect(() => {
+    console.log(`[NewsGrid DEBUG] Articles array changed, length: ${articles.length}`);
+  }, [articles]);
+
   const loadMoreCards = useCallback(() => {
-    if (isLoading || visibleCards >= articles.length) return;
+    if (isLoading || visibleCards >= articles.length) {
+      console.log('[NewsGrid] Skipping loadMore - already loading or at end:', 
+                 { isLoading, visibleCards, totalArticles: articles.length });
+      return;
+    }
+    
+    console.log('[NewsGrid] Loading more cards:', 
+               { current: visibleCards, adding: CARDS_TO_LOAD, total: articles.length });
     
     setIsLoading(true);
     // Simulate loading delay for smoother UX
     setTimeout(() => {
-      setVisibleCards(prev => Math.min(prev + CARDS_TO_LOAD, articles.length));
+      setVisibleCards(prev => {
+        const newValue = Math.min(prev + CARDS_TO_LOAD, articles.length);
+        console.log(`[NewsGrid] Increased visible cards from ${prev} to ${newValue}`);
+        return newValue;
+      });
       setIsLoading(false);
     }, 300);
   }, [isLoading, visibleCards, articles.length]);
   
   // Set up IntersectionObserver for lazy loading
   useEffect(() => {
-    if (!loadMoreRef.current) return;
+    // Fix lazy loading - ensure loadMoreRef is only observed after articles have loaded
+    if (!loadMoreRef.current || articles.length === 0) {
+      console.log("[NewsGrid] loadMoreRef not available yet or no articles");
+      return;
+    }
     
+    // If already at max articles, don't set up observer
+    if (visibleCards >= articles.length) {
+      console.log("[NewsGrid] All articles are already visible, no need for observer");
+      return;
+    }
+    
+    console.log("[NewsGrid] Setting up IntersectionObserver", 
+               { visibleCards, totalArticles: articles.length });
+    
+    // Disconnect any existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+    
+    // Create new observer
     observerRef.current = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
+          console.log('[NewsGrid] Observer triggered, loading more cards', 
+                     { visible: visibleCards, total: articles.length });
           loadMoreCards();
+        } else {
+          console.log('[NewsGrid] Observer element visible but not intersecting');
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '500px' // Increased significantly to ensure it triggers earlier
+      }
     );
     
+    console.log('[NewsGrid] Observing loadMoreRef element');
     observerRef.current.observe(loadMoreRef.current);
     
     return () => {
       if (observerRef.current) {
+        console.log("[NewsGrid] Disconnecting IntersectionObserver");
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreCards]);
+  }, [loadMoreCards, articles.length, visibleCards]);
+  
+  // Function to handle automatic loading after articles are loaded
+  useEffect(() => {
+    // Log when article count changes
+    console.log(`[NewsGrid] Article count changed to ${articles.length}`);
+    
+    // Reset visible cards if article count is too low
+    if (articles.length > 0 && articles.length < visibleCards) {
+      console.log(`[NewsGrid] Adjusting visible cards from ${visibleCards} to ${articles.length}`);
+      setVisibleCards(articles.length);
+    }
+
+    // When articles load, if we don't have the max number of articles visible, force visibility check  
+    if (articles.length > 0 && articles.length > visibleCards && !isLoading) {
+      // Use a short delay to wait for rendering to complete
+      const timer = setTimeout(() => {
+        // Check if we need to load more to fill the page
+        const windowHeight = window.innerHeight;
+        const documentHeight = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+        
+        console.log(`[NewsGrid] Window height: ${windowHeight}, Document height: ${documentHeight}`);
+        
+        if (documentHeight <= windowHeight + 200) {
+          // Need to load more content to fill the page
+          console.log('[NewsGrid] Page needs more content, loading more cards');
+          loadMoreCards();
+        }
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [articles.length, visibleCards, isLoading, loadMoreCards]);
+
+  // Add a scroll handler as a backup to ensure loading
+  useEffect(() => {
+    const handleScroll = () => {
+      if (articles.length <= visibleCards || isLoading) return;
+      
+      if (loadMoreRef.current) {
+        const rect = loadMoreRef.current.getBoundingClientRect();
+        // Load more when loader is within 300px of viewport
+        if (rect.top < window.innerHeight + 300) {
+          console.log('[NewsGrid] Scroll detected loader in view, loading more cards');
+          loadMoreCards();
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [articles.length, visibleCards, isLoading, loadMoreCards]);
 
   if (loading) {
     return <div className={styles.loading}>Loading news...</div>;
@@ -125,9 +251,6 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
     return result;
   };
 
-  // Get visible cards with ads inserted
-  const visibleArticles = articles.slice(0, visibleCards);
-
   // Get top and bottom sections without special treatment for breaking news
   const topGridArticles = visibleArticles.slice(0, TOP_GRID_CARDS);
   const bottomGridArticles = visibleArticles.slice(TOP_GRID_CARDS);
@@ -135,7 +258,8 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
   // Only insert ads in the bottom grid to avoid disrupting the 2x2 layout of top grid
   const bottomGridArticlesWithAds = insertAdsIntoArticles(bottomGridArticles, AD_FREQUENCY);
 
-  const hasMoreCards = visibleCards < articles.length;
+  // Check if there are more cards to load
+  const hasMoreCards = visibleCards < (articles?.length || 0);
 
   return (
     <div className={styles.newsGridWrapper}>
@@ -220,19 +344,10 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
         </div>
       )}
       
-      {/* Load more button */}
+      {/* Invisible loader element for intersection observer */}
       {hasMoreCards && (
-        <div ref={loadMoreRef} className={styles.loadMoreContainer}>
-          {isLoading ? (
-            <div className={styles.loadingMore}>Loading more news...</div>
-          ) : (
-            <button 
-              className={styles.loadMoreButton} 
-              onClick={loadMoreCards}
-            >
-              Load More
-            </button>
-          )}
+        <div ref={loadMoreRef} className={styles.invisibleLoader}>
+          {isLoading && <div className={styles.loadingMore}>Loading more news...</div>}
         </div>
       )}
     </div>

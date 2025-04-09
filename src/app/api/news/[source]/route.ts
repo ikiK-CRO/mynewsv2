@@ -41,11 +41,27 @@ export async function GET(
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // Extract source and endpoint from the request - Properly await params
-    const source = params.source;
+    // IMPORTANT: Next.js requires params object to be awaited in App Router
+    const awaitedParams = await Promise.resolve(params);
+    const { source } = awaitedParams;
+    
+    console.log(`Processing request for source: ${source}`);
+    
+    // More explicit type checking and validation
+    if (!source || typeof source !== 'string') {
+      console.error('Invalid or missing source parameter:', source);
+      return NextResponse.json(
+        { error: 'Missing or invalid source parameter' },
+        { status: 400 }
+      );
+    }
+    
+    // Convert to string explicitly to avoid type issues
+    const sourceStr = source.toLowerCase();
     
     // Validate source
-    if (!['newsapi', 'nytimes'].includes(source.toLowerCase())) {
+    if (!['newsapi', 'nytimes'].includes(sourceStr)) {
+      console.error(`Unsupported source requested: ${sourceStr}`);
       return NextResponse.json(
         { error: 'Invalid source. Use "newsapi" or "nytimes".' },
         { status: 400 }
@@ -56,14 +72,22 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const endpoint = searchParams.get('endpoint') || '';
     
+    if (!endpoint) {
+      console.error(`Missing endpoint parameter for ${sourceStr}`);
+      return NextResponse.json(
+        { error: 'Missing endpoint parameter' },
+        { status: 400 }
+      );
+    }
+    
     // Calculate cache key based on full request
-    const cacheKey = `${source}-${endpoint}-${searchParams.toString()}`;
+    const cacheKey = `${sourceStr}-${endpoint}-${searchParams.toString()}`;
     
     // Check if we have valid cache
     if (cache[cacheKey] && 
         (Date.now() - cache[cacheKey].timestamp) < CACHE_DURATION) {
       const minutesRemaining = Math.round((CACHE_DURATION - (Date.now() - cache[cacheKey].timestamp)) / 60000);
-      console.log(`Serving ${source}/${endpoint} from cache (expires in ${minutesRemaining} minutes)`);
+      console.log(`Serving ${sourceStr}/${endpoint} from cache (expires in ${minutesRemaining} minutes)`);
       return NextResponse.json(cache[cacheKey].data);
     }
 
@@ -71,7 +95,7 @@ export async function GET(
     let apiUrl: string;
     let headers: Record<string, string> = {};
     
-    if (source.toLowerCase() === 'newsapi') {
+    if (sourceStr === 'newsapi') {
       // Check if we're approaching the daily limit for NewsAPI
       if (newsApiRequestCount >= MAX_NEWS_API_REQUESTS) {
         return NextResponse.json(
@@ -119,10 +143,10 @@ export async function GET(
           apiUrl = `${NYT_API_BASE_URL}/mostpopular/v2/viewed/${period}.json?api-key=${NYT_API_KEY}`;
           break;
         case 'newswire':
-          const source = searchParams.get('source') || 'all';
+          const sourceParam = searchParams.get('source') || 'all';
           const limit = searchParams.get('limit') || '20';
           const offset = searchParams.get('offset') || '0';
-          apiUrl = `${NYT_API_BASE_URL}/news/v3/content/${source}/${section}.json?api-key=${NYT_API_KEY}&limit=${limit}&offset=${offset}`;
+          apiUrl = `${NYT_API_BASE_URL}/news/v3/content/${sourceParam}/${section}.json?api-key=${NYT_API_KEY}&limit=${limit}&offset=${offset}`;
           break;
         default:
           return NextResponse.json(
@@ -139,7 +163,7 @@ export async function GET(
     // Make the API request
     const response = await fetch(apiUrl, {
       headers,
-      next: { revalidate: CACHE_DURATION } // Built-in Next.js cache control
+      next: { revalidate: CACHE_DURATION / 1000 } // Built-in Next.js cache control
     });
 
     // Check if request was successful
@@ -152,11 +176,11 @@ export async function GET(
         errorData = { message: response.statusText };
       }
       
-      console.error(`API error (${source}/${endpoint}): ${response.status}`, errorData);
+      console.error(`API error (${sourceStr}/${endpoint}): ${response.status}`, errorData);
       
       return NextResponse.json(
         { 
-          error: errorData.message || `Failed to fetch data from ${source}`, 
+          error: errorData.message || `Failed to fetch data from ${sourceStr}`, 
           status: response.status
         },
         { status: response.status }

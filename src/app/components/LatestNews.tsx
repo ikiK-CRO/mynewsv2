@@ -71,13 +71,12 @@ const LatestNews: React.FC<LatestNewsProps> = ({
     observerRef.current = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasMoreLatestNews && !latestNewsLoading) {
-          console.log('Loading more latest news...');
+          console.log('[LatestNews] Intersection observer triggered, loading more news...');
           loadMoreLatestNews();
         }
       },
       { 
-        root: newsListRef.current,
-        rootMargin: '20px',
+        rootMargin: '100px',
         threshold: 0.1
       }
     );
@@ -172,14 +171,13 @@ const LatestNews: React.FC<LatestNewsProps> = ({
               </div>
             ))}
             
-            {/* Loading indicator and intersection observer target */}
+            {/* Invisible loading indicator for infinite scroll */}
             <div ref={loadMoreRef} className={styles.loadMoreIndicator}>
-              {latestNewsLoading && <span className={styles.loadingDots}>Loading...</span>}
-              {!latestNewsLoading && hasMoreLatestNews && 
-                <button onClick={loadMoreLatestNews} className={styles.loadMoreButton}>
-                  Load more
-                </button>
-              }
+              {latestNewsLoading && (
+                <div className={styles.loadingSpinner}>
+                  <span className={styles.loadingDots}>Loading...</span>
+                </div>
+              )}
             </div>
           </>
         ) : (

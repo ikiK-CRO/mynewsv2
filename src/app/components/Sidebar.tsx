@@ -101,24 +101,32 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategor
   const { user } = useAuth();
 
   const handleItemClick = (category: string, requiresAuth: boolean = false, e: React.MouseEvent) => {
+    console.log(`[Sidebar] Item clicked: ${category}, requiresAuth: ${requiresAuth}`);
+    
+    // Handle favorites separately
     if (category === 'favorites') {
       if (!user) {
         e.preventDefault();
         router.push('/signin');
         return;
       }
-      return;
+      return; // Let the Link component handle navigation to /favorites
     }
     
+    // Handle auth-required items
     if (requiresAuth && !user) {
       e.preventDefault();
       router.push('/signin');
       return;
     }
     
-    if (onCategoryChange && category !== 'favorites') {
+    // Handle category changes - prevent default navigation and use the callback
+    if (onCategoryChange && category !== activeCategory) {
       e.preventDefault();
+      console.log(`[Sidebar] Category change requested: ${category}`);
       onCategoryChange(category);
+    } else {
+      console.log(`[Sidebar] No category change needed or no callback provided`);
     }
   };
 

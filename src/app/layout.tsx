@@ -2,6 +2,7 @@ import "./globals.scss";
 import Topbar from "./components/Topbar";
 import React from "react";
 import { AuthProvider } from "./context/AuthContext";
+import { NewsProvider } from "./context/NewsContext";
 
 export const metadata = {
   title: "My News App",
@@ -17,10 +18,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <AuthProvider>
-        <Topbar />
-        <div className="container">
-          {children}
-        </div>
+          <NewsProvider>
+            <Topbar />
+            <div className="container">
+              {children}
+            </div>
+          </NewsProvider>
         </AuthProvider>
       </body>
     </html>
