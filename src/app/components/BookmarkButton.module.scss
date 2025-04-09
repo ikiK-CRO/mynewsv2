@@ -1,0 +1,64 @@
+@use '../styles/abstracts/variables' as v;
+
+.bookmarkButton {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: absolute;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #6B6B6B;
+  opacity: 0;
+  
+  &:hover {
+    background: white;
+    transform: scale(1.05);
+    color: v.$color-primary;
+  }
+  
+  &.active {
+    color: v.$color-primary;
+    opacity: 1; // Always show when active
+  }
+}
+
+// Position variants
+.image-overlay {
+  top: 8px;
+  right: 8px;
+}
+
+.top-right {
+  top: 8px;
+  right: 8px;
+}
+
+.bottom-right {
+  bottom: 8px;
+  right: 8px;
+}
+
+// Animation for bookmark action
+@keyframes bookmark-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.active {
+  animation: bookmark-pulse 0.3s ease-in-out;
+  color: v.$color-primary;
+} 

@@ -4,6 +4,7 @@ import styles from './NewsGrid.module.scss';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UnifiedArticle } from '../types/news';
 import AdCard from './AdCard';
+import BookmarkButton from './BookmarkButton';
 
 interface NewsGridProps {
   articles: UnifiedArticle[];
@@ -135,6 +136,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
               className={styles.newsImage}
               onError={() => handleImageError(article.id)}
             />
+            <BookmarkButton article={article} />
             <div className={styles.cardContent}>
               <div className={styles.cardHeader}>
                 {article.category === 'BREAKING' ? (
@@ -174,6 +176,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
                     className={styles.newsImage}
                     onError={() => handleImageError(item.id)}
                   />
+                  <BookmarkButton article={item} />
                   <div className={styles.cardContent}>
                     <div className={styles.cardHeader}>
                       {item.category === 'BREAKING' ? (

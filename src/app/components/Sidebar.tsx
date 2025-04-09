@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import styles from './Sidebar.module.scss';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 
 type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
   category: string;
+  requiresAuth?: boolean;
 };
 
 // Icons from the Default.svg file with exactly 20px dimensions
@@ -57,6 +60,24 @@ const icons: Record<string, React.ReactNode> = {
       </g>
     </svg>
   ),
+  favorites: (
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 16 20" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path 
+        d="M15 19L8 14L1 19V3C1 2.46957 1.21071 1.96086 1.58579 1.58579C1.96086 1.21071 2.46957 1 3 1H13C13.5304 1 14.0391 1.21071 14.4142 1.58579C14.7893 1.96086 15 2.46957 15 3V19Z" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="currentColor" 
+      />
+    </svg>
+  ),
 };
 
 const navItems: NavItem[] = [
@@ -67,6 +88,7 @@ const navItems: NavItem[] = [
   { href: '/category/science', label: 'Science', icon: icons.science, category: 'science' },
   { href: '/category/sports', label: 'Sports', icon: icons.sports, category: 'sports' },
   { href: '/category/technology', label: 'Technology', icon: icons.technology, category: 'technology' },
+  { href: '/favorites', label: 'Favorites', icon: icons.favorites, category: 'favorites', requiresAuth: true },
 ];
 
 interface SidebarProps {
@@ -75,7 +97,16 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategoryChange }) => {
-  const handleItemClick = (category: string, e: React.MouseEvent) => {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleItemClick = (category: string, requiresAuth: boolean = false, e: React.MouseEvent) => {
+    if (requiresAuth && !user) {
+      e.preventDefault();
+      router.push('/signin');
+      return;
+    }
+    
     if (onCategoryChange) {
       e.preventDefault();
       onCategoryChange(category);
@@ -89,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategor
           href={item.href}
           key={item.label}
           className={`${styles.navItem} ${item.category === activeCategory ? styles.active : ''}`}
-          onClick={(e) => handleItemClick(item.category, e)}
+          onClick={(e) => handleItemClick(item.category, item.requiresAuth, e)}
         >
           <div className={styles.iconWrapper}>{item.icon}</div>
           <span className={styles.label}>{item.label}</span>

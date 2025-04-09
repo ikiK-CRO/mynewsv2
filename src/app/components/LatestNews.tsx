@@ -4,6 +4,7 @@ import styles from './LatestNews.module.scss';
 import Link from 'next/link';
 import React, { useEffect, useRef, useCallback } from 'react';
 import { UnifiedArticle } from '../types/news';
+import BookmarkButton from './BookmarkButton';
 
 interface LatestNewsProps {
   latestNews: UnifiedArticle[];
@@ -155,14 +156,19 @@ const LatestNews: React.FC<LatestNewsProps> = ({
                   <span className={styles.time}>{formatTime(item.publishedAt)}</span>
                   <span className={styles.source}>{item.source}</span>
                 </div>
-                <a 
-                  href={item.url} 
-                  className={styles.titleLink}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  {item.title}
-                </a>
+                <div className={styles.titleWrapper}>
+                  <a 
+                    href={item.url} 
+                    className={styles.titleLink}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    {item.title}
+                  </a>
+                  <div className={styles.bookmarkWrapper}>
+                    <BookmarkButton article={item} position="bottom-right" />
+                  </div>
+                </div>
               </div>
             ))}
             

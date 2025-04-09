@@ -121,18 +121,40 @@
   letter-spacing: -0.015px;
 }
 
+.titleWrapper {
+  position: relative;
+  display: flex;
+}
+
 .titleLink {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: -0.11px;
+  font-size: 15px;
   color: #1D1D1B;
+  letter-spacing: -0.136px;
+  line-height: 20px;
   text-decoration: none;
-  transition: color 0.2s ease-in-out;
-
+  transition: color 0.2s;
+  flex: 1;
+  
   &:hover {
     color: #1E71BB;
+  }
+}
+
+.bookmarkWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  
+  :global(.bookmarkButton) {
+    position: relative;
+    opacity: 1;
+    top: auto;
+    right: auto;
+    width: 24px;
+    height: 24px;
   }
 }
 

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './SearchSection.module.scss';
 import React, { useState } from 'react';
 
@@ -21,9 +22,11 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
 
   return (
     <div className={styles.searchSection}>
-      <div className={styles.logo}>
-        <span style={{ color: '#BB1E1E' }}>My</span>News
-      </div>
+      <Link href="/" className={styles.logoLink}>
+        <div className={styles.logo}>
+          <span>My</span>News
+        </div>
+      </Link>
       <form className={styles.searchWrapper} onSubmit={handleSearchSubmit}>
         <svg
           className={styles.searchIcon}

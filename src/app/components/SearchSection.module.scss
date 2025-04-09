@@ -61,3 +61,14 @@
   line-height: 20px;
   text-transform: uppercase;
 } 
+
+
+.logoLink {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+} 

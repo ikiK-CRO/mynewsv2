@@ -13,9 +13,13 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src/"
   },
   "dependencies": {
+    "firebase": "^10.14.1",
+    "firebase-admin": "^13.2.0",
+    "firebaseui": "^6.1.0",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-firebase-hooks": "^5.1.1",
     "sass": "^1.86.3"
   },
   "devDependencies": {
