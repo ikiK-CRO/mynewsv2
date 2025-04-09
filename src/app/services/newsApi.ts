@@ -1,85 +1,96 @@
 import { NewsApiResponse, NewsApiArticle, UnifiedArticle } from '../types/news';
 
-const NEWS_API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY || '';
-const BASE_URL = 'https://newsapi.org/v2';
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/440x293/E8E8E8/AAAAAA?text=News+API';
 
 // Utility function to add delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Fetch with retry logic
-async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
-  let retries = 0;
-  
-  while (retries <= maxRetries) {
-    const response = await fetch(url);
-    
-    // If not rate limited or max retries reached, return the response
-    if (response.status !== 429 || retries === maxRetries) {
-      return response;
-    }
-    
-    // Exponential backoff: wait longer between each retry
-    const waitTime = Math.pow(2, retries) * 1000;
-    console.log(`Rate limited by News API. Retrying in ${waitTime}ms...`);
-    await delay(waitTime);
-    retries++;
-  }
-  
-  throw new Error('Unexpected error in fetchWithRetry');
-}
+// Check if code is running on server or client
+const isServer = typeof window === 'undefined';
 
-export async function fetchTopHeadlines(category: string = ''): Promise<NewsApiResponse> {
-  if (!NEWS_API_KEY) {
-    throw new Error('NewsAPI key is missing. Please check your environment variables.');
-  }
-
-  const params = new URLSearchParams({
-    apiKey: NEWS_API_KEY,
-    language: 'en',
-    ...(category && category !== 'general' ? { category } : {})
+/**
+ * Fetch data from NewsAPI through our server-side proxy
+ * @param endpoint The NewsAPI endpoint (top-headlines, everything)
+ * @param params Additional query parameters
+ */
+async function fetchFromNewsApi(endpoint: string, params: Record<string, string>): Promise<NewsApiResponse> {
+  // Build the query parameters
+  const queryParams = new URLSearchParams({
+    endpoint,
+    ...params
   });
-
+  
   try {
-    const response = await fetchWithRetry(`${BASE_URL}/top-headlines?${params}`);
+    // Use the server-side API route
+    const apiUrl = `/api/news/newsapi?${queryParams}`;
+    
+    // Make the request with retries for network errors
+    const response = await fetchWithRetry(apiUrl);
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch top headlines: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(`NewsAPI error: ${errorData.error || response.statusText}`);
     }
     
     return response.json();
   } catch (error) {
-    console.error('Error fetching top headlines:', error);
+    console.error(`Error fetching from NewsAPI (${endpoint}):`, error);
     throw error;
   }
 }
 
-export async function fetchEverything(query: string, sortBy: string = 'publishedAt'): Promise<NewsApiResponse> {
-  if (!NEWS_API_KEY) {
-    throw new Error('NewsAPI key is missing. Please check your environment variables.');
+/**
+ * Simple fetch with retry for network errors
+ */
+async function fetchWithRetry(url: string, maxRetries = 1): Promise<Response> {
+  let lastError;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fetch(url);
+    } catch (error) {
+      console.error(`Network error (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
+      lastError = error;
+      
+      if (attempt < maxRetries) {
+        // Wait before retry with exponential backoff
+        await delay(Math.pow(2, attempt) * 1000);
+      }
+    }
   }
+  
+  throw lastError;
+}
 
-  const params = new URLSearchParams({
-    apiKey: NEWS_API_KEY,
+/**
+ * Fetch top headlines from NewsAPI
+ */
+export async function fetchTopHeadlines(category: string = ''): Promise<NewsApiResponse> {
+  const params: Record<string, string> = {
+    language: 'en'
+  };
+  
+  if (category && category !== 'general') {
+    params.category = category;
+  }
+  
+  return fetchFromNewsApi('top-headlines', params);
+}
+
+/**
+ * Fetch articles matching a query from NewsAPI
+ */
+export async function fetchEverything(query: string, sortBy: string = 'publishedAt'): Promise<NewsApiResponse> {
+  return fetchFromNewsApi('everything', {
     q: query,
     sortBy,
     language: 'en'
   });
-
-  try {
-    const response = await fetchWithRetry(`${BASE_URL}/everything?${params}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch everything: ${response.statusText}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching everything:', error);
-    throw error;
-  }
 }
 
+/**
+ * Map a NewsAPI article to the unified format
+ */
 export function mapNewsApiToUnified(article: NewsApiArticle): UnifiedArticle {
   return {
     id: article.url,
@@ -95,6 +106,9 @@ export function mapNewsApiToUnified(article: NewsApiArticle): UnifiedArticle {
   };
 }
 
+/**
+ * Get top headlines by category and convert to unified format
+ */
 export async function getTopHeadlinesByCategory(category: string = ''): Promise<UnifiedArticle[]> {
   try {
     const data = await fetchTopHeadlines(category);

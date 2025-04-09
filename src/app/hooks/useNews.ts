@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { UnifiedArticle } from '../types/news';
 import { getLatestNews, getNewsByCategory, getBreakingNews } from '../services/newsService';
 
@@ -36,41 +36,84 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
   const [latestNewsLoading, setLatestNewsLoading] = useState<boolean>(false);
   const [hasMoreLatestNews, setHasMoreLatestNews] = useState<boolean>(true);
 
-  const fetchNews = async () => {
+  // Refs to prevent unnecessary fetches
+  const isMounted = useRef(true);
+  const fetchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastCategoryRef = useRef<string>(category);
+  const isLoadingRef = useRef<boolean>(false);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      if (fetchTimerRef.current) {
+        clearTimeout(fetchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const fetchNews = useCallback(async () => {
+    // Prevent duplicate fetches
+    if (isLoadingRef.current || !isMounted.current) return;
+    
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
     
+    console.log(`[useNews] Fetching news for category: ${category}`);
+    
     try {
-      // Fetch all data in parallel
-      const [categoryArticles, latest, breaking] = await Promise.all([
-        getNewsByCategory(category),
-        getLatestNews(1), // Reset to page 1
-        getBreakingNews()
-      ]);
+      // Fetch category articles first for faster UI response
+      const categoryArticles = await getNewsByCategory(category);
       
-      setArticles(categoryArticles);
-      setLatestNews(latest);
-      setBreakingNews(breaking);
-      
-      // Reset pagination state
-      setLatestNewsPage(1);
-      setHasMoreLatestNews(latest.length > 0);
+      if (isMounted.current) {
+        setArticles(categoryArticles);
+        
+        // Continue loading other data in parallel
+        Promise.all([
+          getLatestNews(1),
+          getBreakingNews()
+        ]).then(([latest, breaking]) => {
+          if (isMounted.current) {
+            setLatestNews(latest);
+            setBreakingNews(breaking);
+            
+            // Reset pagination state
+            setLatestNewsPage(1);
+            setHasMoreLatestNews(latest.length > 0);
+            
+            // Update last fetched category
+            lastCategoryRef.current = category;
+          }
+        }).catch(err => {
+          console.error('Error fetching additional news data:', err);
+        }).finally(() => {
+          if (isMounted.current) {
+            setLoading(false);
+            isLoadingRef.current = false;
+          }
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('An error occurred fetching news'));
-      console.error('Error in useNews hook:', err);
-    } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setError(err instanceof Error ? err : new Error('An error occurred fetching news'));
+        console.error('Error in useNews hook:', err);
+        setLoading(false);
+        isLoadingRef.current = false;
+      }
     }
-  };
+  }, [category]);
 
   // Function to load more latest news
   const loadMoreLatestNews = useCallback(async () => {
-    if (latestNewsLoading || !hasMoreLatestNews) return;
+    if (latestNewsLoading || !hasMoreLatestNews || !isMounted.current) return;
     
     setLatestNewsLoading(true);
     try {
       const nextPage = latestNewsPage + 1;
       const moreLatestNews = await getLatestNews(nextPage);
+      
+      if (!isMounted.current) return;
       
       if (moreLatestNews.length === 0) {
         setHasMoreLatestNews(false);
@@ -84,9 +127,13 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
         });
       }
     } catch (err) {
-      console.error('Error loading more latest news:', err);
+      if (isMounted.current) {
+        console.error('Error loading more latest news:', err);
+      }
     } finally {
-      setLatestNewsLoading(false);
+      if (isMounted.current) {
+        setLatestNewsLoading(false);
+      }
     }
   }, [latestNewsPage, latestNewsLoading, hasMoreLatestNews]);
 
@@ -128,7 +175,7 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
     setSearchResults([]);
   }, []);
 
-  // Fetch news when the category changes
+  // Fetch news when the category changes, with debounce
   useEffect(() => {
     // Skip API calls when we're on the favorites page 
     if (typeof window !== 'undefined' && window.IS_FAVORITES_PAGE) {
@@ -137,13 +184,38 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
       return;
     }
     
-    fetchNews();
-  }, [category]);
+    // Skip if category hasn't changed to avoid duplicate fetches
+    if (category === lastCategoryRef.current && articles.length > 0) {
+      console.log(`[useNews] Skipping duplicate fetch for category ${category}`);
+      return;
+    }
+    
+    // Clear any existing timer
+    if (fetchTimerRef.current) {
+      clearTimeout(fetchTimerRef.current);
+    }
+    
+    // Debounce API calls to prevent excessive requests during navigation
+    fetchTimerRef.current = setTimeout(() => {
+      fetchNews();
+    }, 300);
+    
+    // Cleanup timer on unmount or category change
+    return () => {
+      if (fetchTimerRef.current) {
+        clearTimeout(fetchTimerRef.current);
+      }
+    };
+  }, [category, fetchNews, articles.length]);
 
   // Function to manually refresh the news
-  const refreshNews = async () => {
+  const refreshNews = useCallback(async () => {
+    if (fetchTimerRef.current) {
+      clearTimeout(fetchTimerRef.current);
+    }
+    
     await fetchNews();
-  };
+  }, [fetchNews]);
 
   return {
     articles,

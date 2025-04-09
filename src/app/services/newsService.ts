@@ -6,53 +6,91 @@ import {
   getNewswireArticles 
 } from './nyTimesApi';
 
-// Combine and deduplicate articles from multiple sources
+// Map both source categories to our internal categories for consistency
+const CATEGORY_MAP = {
+  // NewsAPI categories
+  'general': 'general',
+  'business': 'business',
+  'entertainment': 'entertainment',
+  'health': 'health',
+  'science': 'science',
+  'sports': 'sports',
+  'technology': 'technology',
+  
+  // NYTimes sections that need normalization
+  'home': 'general',
+  'world': 'general',
+  'us': 'general',
+  'arts': 'entertainment',
+  'books': 'entertainment',
+  'style': 'entertainment',
+  'food': 'lifestyle',
+  'travel': 'lifestyle',
+  'magazine': 'lifestyle',
+  'realestate': 'business',
+  'automobiles': 'business',
+};
+
+/**
+ * Normalize category names across different sources
+ */
+function normalizeCategory(category: string): string {
+  return CATEGORY_MAP[category.toLowerCase()] || category.toLowerCase();
+}
+
+/**
+ * Combine and deduplicate articles from multiple sources
+ */
 function combineAndDeduplicate(arrays: UnifiedArticle[][]): UnifiedArticle[] {
   const combined = arrays.flat();
   const seen = new Set<string>();
   
-  return combined.filter(article => {
-    // Use the article title for deduplication since URLs may differ between sources
-    const key = article.title.toLowerCase().trim();
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
+  return combined
+    .filter(article => {
+      // Use the article title for deduplication since URLs may differ between sources
+      const key = article.title.toLowerCase().trim();
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    // Ensure consistent category names across all articles
+    .map(article => ({
+      ...article,
+      category: normalizeCategory(article.category)
+    }));
 }
 
+/**
+ * Get latest news with pagination
+ * Uses a reduced set of API calls while maintaining diversity of sources
+ */
 export async function getLatestNews(page: number = 1, pageSize: number = 20): Promise<UnifiedArticle[]> {
-  // Combine multiple news sources for a more comprehensive latest news feed
   try {
-    // Fetch from multiple sources in parallel
+    // Reduced API calls - only 4 sources instead of 10
+    // But keeping both NewsAPI and NYTimes sources for diversity
     const results = await Promise.allSettled([
-      // NY Times Newswire API - Latest published content (most real-time)
-      getNewswireArticles('all', 'all', 20, 0),
-      // NY Times - Most popular viewed in last 7 days
+      // NY Times - Most essential endpoints (2)
       getMostPopularArticles(7),
-      // NY Times - Top stories from home section
       getTopStoriesBySection('home'),
-      // NY Times - Top stories from world section (additional content)
-      getTopStoriesBySection('world'),
-      // NY Times - Additional sections for more variety
-      getTopStoriesBySection('science'),
-      getTopStoriesBySection('arts'),
-      // NewsAPI - Top headlines (general category)
+      // NewsAPI - Essential categories (2)
       getTopHeadlinesByCategory('general'),
-      // NewsAPI - Top headlines (technology category for more variety)
-      getTopHeadlinesByCategory('technology'),
-      // NewsAPI - Additional categories
-      getTopHeadlinesByCategory('business'),
-      getTopHeadlinesByCategory('entertainment')
+      getTopHeadlinesByCategory('technology')
     ]);
     
     // Collect all successful results
     const allArticles: UnifiedArticle[] = [];
     
-    results.forEach(result => {
+    results.forEach((result, index) => {
       if (result.status === 'fulfilled' && result.value.length > 0) {
-        allArticles.push(...result.value);
+        // Normalize all categories before adding to allArticles
+        const normalizedArticles = result.value.map(article => ({
+          ...article,
+          category: normalizeCategory(article.category)
+        }));
+        allArticles.push(...normalizedArticles);
+        console.log(`Got ${result.value.length} articles from source ${index}`);
       }
     });
     
@@ -78,38 +116,20 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
     
-    // Group articles by date for better organization
-    const articlesByDate = sortedArticles.reduce((groups, article) => {
-      const date = new Date(article.publishedAt).toDateString();
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(article);
-      return groups;
-    }, {} as Record<string, UnifiedArticle[]>);
-    
-    // Flatten grouped articles, maintaining date order
-    const dates = Object.keys(articlesByDate).sort((a, b) => 
-      new Date(b).getTime() - new Date(a).getTime()
-    );
-    
-    // Ensure we have at least 10 articles per day where possible
-    const flattenedArticles = dates.flatMap(date => articlesByDate[date]);
-    
     // Calculate pagination
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     
     // For debugging
-    console.log(`Fetching latest news page ${page}, items ${start}-${end} of ${flattenedArticles.length}`);
+    console.log(`Fetching latest news page ${page}, items ${start}-${end} of ${sortedArticles.length}`);
     
     // Only return empty array if we're past the total items
-    if (start >= flattenedArticles.length) {
+    if (start >= sortedArticles.length) {
       return [];
     }
     
     // Return the paginated slice with unique IDs
-    return flattenedArticles.slice(start, end).map((article, index) => {
+    return sortedArticles.slice(start, end).map((article, index) => {
       if (!article.id) {
         return {
           ...article,
@@ -124,38 +144,37 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
   }
 }
 
+/**
+ * Get news by category
+ * Uses both sources to ensure diverse news
+ */
 export async function getNewsByCategory(category: string = 'general'): Promise<UnifiedArticle[]> {
   try {
     // Map our app categories to NYTimes sections
     const nyTimesSection = category === 'general' ? 'home' : category;
     
-    // Attempt to fetch from all sources, but handle individual failures
+    // Attempt to fetch from both sources for diversity, but limit to 2 API calls
     const results = await Promise.allSettled([
       getTopHeadlinesByCategory(category),
-      getTopStoriesBySection(nyTimesSection),
-      getNewswireArticles('all', nyTimesSection, 20, 0) // Add Newswire API for real-time articles
+      getTopStoriesBySection(nyTimesSection)
     ]);
     
     const successfulResults: UnifiedArticle[][] = [];
     
     // Process results, logging any failures
-    if (results[0].status === 'fulfilled') {
-      successfulResults.push(results[0].value);
-    } else {
-      console.error('NewsAPI request failed:', results[0].reason);
-    }
-    
-    if (results[1].status === 'fulfilled') {
-      successfulResults.push(results[1].value);
-    } else {
-      console.error('NY Times Top Stories request failed:', results[1].reason);
-    }
-    
-    if (results[2].status === 'fulfilled') {
-      successfulResults.push(results[2].value);
-    } else {
-      console.error('NY Times Newswire request failed:', results[2].reason);
-    }
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        // Normalize all categories before adding to results
+        const normalizedArticles = result.value.map(article => ({
+          ...article,
+          category: normalizeCategory(category) // Use requested category for consistency
+        }));
+        successfulResults.push(normalizedArticles);
+        console.log(`Got ${result.value.length} articles from source ${index} for category ${category}`);
+      } else {
+        console.error(`API request ${index} failed for category ${category}:`, result.reason);
+      }
+    });
     
     // As long as at least one API succeeded, we can show some results
     if (successfulResults.length > 0) {
@@ -177,37 +196,40 @@ export async function getNewsByCategory(category: string = 'general'): Promise<U
   }
 }
 
+/**
+ * Get breaking news
+ * Uses both sources to ensure diversity
+ */
 export async function getBreakingNews(): Promise<UnifiedArticle[]> {
   try {
-    // Fetch from all sources in parallel
+    // Use both sources for breaking news but reduced to 2 API calls
     const results = await Promise.allSettled([
       getTopHeadlinesByCategory(), // NewsAPI
-      getTopStoriesBySection('home'), // NY Times Top Stories
-      getNewswireArticles('all', 'all', 5, 0) // NY Times Newswire for real-time breaking news
+      getTopStoriesBySection('home') // NY Times Top Stories
     ]);
     
     const breakingNews: UnifiedArticle[] = [];
     
-    // Add top article from NewsAPI if successful
+    // Add top article from NewsAPI if successful (first position)
     if (results[0].status === 'fulfilled' && results[0].value.length > 0) {
       breakingNews.push({
         ...results[0].value[0],
         category: 'BREAKING'
       });
+      
+      // Add a second article if available
+      if (results[0].value.length > 1) {
+        breakingNews.push({
+          ...results[0].value[1],
+          category: 'BREAKING'
+        });
+      }
     }
     
     // Add top article from NY Times Top Stories if successful
     if (results[1].status === 'fulfilled' && results[1].value.length > 0) {
       breakingNews.push({
         ...results[1].value[0],
-        category: 'BREAKING'
-      });
-    }
-    
-    // Add latest article from NY Times Newswire if successful
-    if (results[2].status === 'fulfilled' && results[2].value.length > 0) {
-      breakingNews.push({
-        ...results[2].value[0],
         category: 'BREAKING'
       });
     }
