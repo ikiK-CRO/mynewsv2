@@ -12,6 +12,11 @@ interface UseNewsReturn {
   loadMoreLatestNews: () => Promise<void>;
   latestNewsLoading: boolean;
   hasMoreLatestNews: boolean;
+  searchResults: UnifiedArticle[];
+  searchLoading: boolean;
+  searchTerm: string;
+  searchNews: (term: string) => void;
+  clearSearch: () => void;
 }
 
 export default function useNews(category: string = 'general'): UseNewsReturn {
@@ -20,6 +25,11 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
   const [breakingNews, setBreakingNews] = useState<UnifiedArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // Search state
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<UnifiedArticle[]>([]);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
   
   // Pagination state for latest news
   const [latestNewsPage, setLatestNewsPage] = useState<number>(1);
@@ -80,6 +90,44 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
     }
   }, [latestNewsPage, latestNewsLoading, hasMoreLatestNews]);
 
+  // Search functionality
+  const searchNews = useCallback((term: string) => {
+    setSearchTerm(term);
+    setSearchLoading(true);
+    
+    // Combine all articles to search through
+    const allArticles = [
+      ...articles,
+      ...latestNews,
+      ...breakingNews
+    ];
+    
+    // Remove duplicates by id
+    const uniqueArticles = Array.from(
+      new Map(allArticles.map(article => [article.id, article])).values()
+    );
+    
+    // Filter articles based on search term
+    const results = uniqueArticles.filter(article => {
+      const searchLower = term.toLowerCase();
+      return (
+        article.title.toLowerCase().includes(searchLower) ||
+        (article.description && article.description.toLowerCase().includes(searchLower)) ||
+        (article.author && article.author.toLowerCase().includes(searchLower)) ||
+        article.source.toLowerCase().includes(searchLower) ||
+        article.category.toLowerCase().includes(searchLower)
+      );
+    });
+    
+    setSearchResults(results);
+    setSearchLoading(false);
+  }, [articles, latestNews, breakingNews]);
+
+  const clearSearch = useCallback(() => {
+    setSearchTerm('');
+    setSearchResults([]);
+  }, []);
+
   // Fetch news when the category changes
   useEffect(() => {
     fetchNews();
@@ -99,6 +147,11 @@ export default function useNews(category: string = 'general'): UseNewsReturn {
     refreshNews,
     loadMoreLatestNews,
     latestNewsLoading,
-    hasMoreLatestNews
+    hasMoreLatestNews,
+    searchResults,
+    searchLoading,
+    searchTerm,
+    searchNews,
+    clearSearch
   };
 } 

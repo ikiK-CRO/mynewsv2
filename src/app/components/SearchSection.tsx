@@ -1,13 +1,30 @@
 import styles from './SearchSection.module.scss';
-import React from 'react';
+import React, { useState } from 'react';
 
-const SearchSection: React.FC = () => {
+interface SearchSectionProps {
+  onSearch: (searchTerm: string) => void;
+}
+
+const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      onSearch(searchTerm.trim());
+    }
+  };
+
   return (
     <div className={styles.searchSection}>
       <div className={styles.logo}>
         <span style={{ color: '#BB1E1E' }}>My</span>News
       </div>
-      <div className={styles.searchWrapper}>
+      <form className={styles.searchWrapper} onSubmit={handleSearchSubmit}>
         <svg
           className={styles.searchIcon}
           width="20"
@@ -27,11 +44,13 @@ const SearchSection: React.FC = () => {
           type="text"
           className={styles.searchInput}
           placeholder="Search news"
+          value={searchTerm}
+          onChange={handleSearchChange}
         />
-        <button className={styles.searchButton}>
+        <button type="submit" className={styles.searchButton}>
           SEARCH
         </button>
-      </div>
+      </form>
     </div>
   );
 };

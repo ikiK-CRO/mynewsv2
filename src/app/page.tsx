@@ -18,19 +18,36 @@ const Home: React.FC = () => {
     latestNews, 
     breakingNews, 
     loading, 
-    error, 
+    error,
     loadMoreLatestNews,
     latestNewsLoading,
-    hasMoreLatestNews
+    hasMoreLatestNews,
+    searchResults,
+    searchLoading,
+    searchTerm,
+    searchNews,
+    clearSearch
   } = useNews(activeCategory);
 
   // Handle category change when a sidebar item is clicked
   const handleCategoryChange = useCallback((category: string) => {
     setActiveCategory(category);
-  }, []);
+    // Clear search when changing categories
+    clearSearch();
+  }, [clearSearch]);
+
+  // Handle search
+  const handleSearch = useCallback((term: string) => {
+    searchNews(term);
+  }, [searchNews]);
 
   // Merge articles and insert breaking news at random positions within first 11 articles
   const allArticles = React.useMemo(() => {
+    // If there's an active search, return search results
+    if (searchTerm) {
+      return searchResults;
+    }
+
     // First, remove any duplicates between breaking news and regular articles
     const regularArticles = articles.filter(article => 
       !breakingNews.some(breaking => breaking.id === article.id)
@@ -67,30 +84,48 @@ const Home: React.FC = () => {
       // Otherwise sort by date
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
     });
-  }, [articles, breakingNews]);
+  }, [articles, breakingNews, searchTerm, searchResults]);
 
   return (
     <main className={styles.container}>
-      <SearchSection />
+      <SearchSection onSearch={handleSearch} />
       <Divider />
-      <div className={styles.contentGrid}>
-        <aside className={styles.sidebarContainer}>
-          <Sidebar activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
-        </aside>
-        <section className={styles.newsGridContainer}>
-          <h2 className={styles.sectionTitle}>News</h2>
-          <NewsGrid articles={allArticles} loading={loading} />
-        </section>
-        <aside className={styles.latestNewsContainer}>
-          <LatestNews 
-            latestNews={latestNews} 
-            loading={loading} 
-            loadMoreLatestNews={loadMoreLatestNews}
-            latestNewsLoading={latestNewsLoading}
-            hasMoreLatestNews={hasMoreLatestNews}
+      {searchTerm ? (
+        <div className={styles.searchResults}>
+          <h2 className={styles.sectionTitle}>
+            Search Results for "{searchTerm}" 
+            <button 
+              className={styles.clearSearch}
+              onClick={clearSearch}
+            >
+              Clear Search
+            </button>
+          </h2>
+          <NewsGrid 
+            articles={allArticles} 
+            loading={searchLoading} 
           />
-        </aside>
-      </div>
+        </div>
+      ) : (
+        <div className={styles.contentGrid}>
+          <aside className={styles.sidebarContainer}>
+            <Sidebar activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+          </aside>
+          <section className={styles.newsGridContainer}>
+            <h2 className={styles.sectionTitle}>News</h2>
+            <NewsGrid articles={allArticles} loading={loading} />
+          </section>
+          <aside className={styles.latestNewsContainer}>
+            <LatestNews 
+              latestNews={latestNews} 
+              loading={loading} 
+              loadMoreLatestNews={loadMoreLatestNews}
+              latestNewsLoading={latestNewsLoading}
+              hasMoreLatestNews={hasMoreLatestNews}
+            />
+          </aside>
+        </div>
+      )}
     </main>
   );
 };
