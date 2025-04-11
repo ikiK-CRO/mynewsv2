@@ -6,22 +6,39 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { UnifiedArticle } from '../types/news';
 import BookmarkButton from './BookmarkButton';
 import { useAuth } from '../context/AuthContext';
+import { useArticles } from '../context/ArticleContext';
 
 interface LatestNewsProps {
-  latestNews: UnifiedArticle[];
-  loading: boolean;
-  loadMoreLatestNews: () => Promise<void>;
-  latestNewsLoading: boolean;
-  hasMoreLatestNews: boolean;
+  latestNews?: UnifiedArticle[];
+  loading?: boolean;
+  loadMoreLatestNews?: () => Promise<void>;
+  latestNewsLoading?: boolean;
+  hasMoreLatestNews?: boolean;
 }
 
 const LatestNews: React.FC<LatestNewsProps> = ({
-  latestNews,
-  loading,
-  loadMoreLatestNews,
-  latestNewsLoading,
-  hasMoreLatestNews
+  latestNews: propLatestNews,
+  loading: propLoading,
+  loadMoreLatestNews: propLoadMoreLatestNews,
+  latestNewsLoading: propLatestNewsLoading,
+  hasMoreLatestNews: propHasMoreLatestNews
 }) => {
+  // Use context values if props are not provided
+  const { 
+    latestNews: contextLatestNews, 
+    loading: contextLoading,
+    loadMoreLatestNews: contextLoadMoreLatestNews,
+    latestNewsLoading: contextLatestNewsLoading,
+    hasMoreLatestNews: contextHasMoreLatestNews
+  } = useArticles();
+  
+  // Use props if provided, otherwise use context values
+  const latestNews = propLatestNews || contextLatestNews;
+  const loading = propLoading ?? contextLoading;
+  const loadMoreLatestNews = propLoadMoreLatestNews || contextLoadMoreLatestNews;
+  const latestNewsLoading = propLatestNewsLoading ?? contextLatestNewsLoading;
+  const hasMoreLatestNews = propHasMoreLatestNews ?? contextHasMoreLatestNews;
+  
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const newsListRef = useRef<HTMLDivElement>(null);

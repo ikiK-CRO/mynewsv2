@@ -5,10 +5,12 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { UnifiedArticle } from '../types/news';
 import AdCard from './AdCard';
 import BookmarkButton from './BookmarkButton';
+import { useArticles } from '../context/ArticleContext';
+import { useSearch } from '../context/SearchContext';
 
 interface NewsGridProps {
-  articles: UnifiedArticle[];
-  loading: boolean;
+  articles?: UnifiedArticle[];
+  loading?: boolean;
 }
 
 // Number of cards initially visible (2 cards per row for first 2 rows, then 3 cards per row for next 4 rows)
@@ -19,36 +21,55 @@ const AD_FREQUENCY = 6; // Insert ad after every 5th article (appears at positio
 
 const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=No+Image';
 
-const NewsGrid: React.FC<NewsGridProps> = ({ articles, loading }) => {
+const NewsGrid: React.FC<NewsGridProps> = ({ 
+  articles: propArticles, 
+  loading: propLoading 
+}) => {
+  // Get context values
+  const { articles: contextArticles, loading: contextLoading } = useArticles();
+  const { searchResults, searchTerm, searchLoading } = useSearch();
+  
+  // Use props if provided, otherwise use context values
+  const articles = propArticles || contextArticles;
+  const loading = propLoading ?? contextLoading;
+  
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
   const [visibleCards, setVisibleCards] = useState<number>(INITIAL_VISIBLE_CARDS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
+  // Determine which articles to display based on search state
+  const articlesToDisplay = useMemo(() => {
+    if (searchTerm && searchResults) {
+      return searchResults;
+    }
+    return articles;
+  }, [articles, searchResults, searchTerm]);
+  
   // IMPORTANT: Update the visibleArticles useMemo to be called unconditionally
   // This must come before other hooks to maintain hook ordering
   const visibleArticles = useMemo(() => {
     // Add a check at the beginning of the component to better handle empty article arrays
-    console.log(`[NewsGrid] / received ${articles?.length || 0} articles`);
+    console.log(`[NewsGrid] / received ${articlesToDisplay?.length || 0} articles`);
     
-    if (!articles || articles.length === 0) {
+    if (!articlesToDisplay || articlesToDisplay.length === 0) {
       console.log('[NewsGrid] No articles to display in useMemo');
       return [];
     }
     
     try {
-      console.log('[NewsGrid DEBUG] Articles array changed, length:', articles.length);
-      return articles.slice(0, visibleCards);
+      console.log('[NewsGrid DEBUG] Articles array changed, length:', articlesToDisplay.length);
+      return articlesToDisplay.slice(0, visibleCards);
     } catch (error) {
       console.error('[NewsGrid] Error processing articles in useMemo:', error);
       return [];
     }
-  }, [articles, visibleCards]);
+  }, [articlesToDisplay, visibleCards]);
   
   // Only log the "No articles received" message if we're not in a loading state
-  if (articles?.length === 0 && !loading) {
-    console.log('[NewsGrid] No articles received');
+  if (articlesToDisplay?.length === 0 && !loading && !searchLoading) {
+    console.log('[NewsGrid] No articles received and not loading');
   }
 
   // Log the articles received from props on mount and when they change

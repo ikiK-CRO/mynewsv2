@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { addBookmark, removeBookmark, isBookmarked } from '../services/bookmarkService';
+import { useBookmarks } from '../context/BookmarkContext';
 import { UnifiedArticle } from '../types/news';
 import styles from './BookmarkButton.module.scss';
 
@@ -20,6 +20,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   const [isChecking, setIsChecking] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
+  const { bookmarkedIds, toggleBookmark, checkIsBookmarked } = useBookmarks();
   const router = useRouter();
 
   const checkBookmarkStatus = useCallback(async () => {
@@ -41,7 +42,17 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     setIsChecking(true);
     try {
       console.log(`[BookmarkButton] Checking bookmark status for article: ${article.title} (${article.id})`);
-      const bookmarkStatus = await isBookmarked(user.uid, article.id);
+      
+      // First check the local state
+      if (bookmarkedIds.has(article.id)) {
+        console.log(`[BookmarkButton] Article ${article.id} is bookmarked (from local state)`);
+        setIsMarked(true);
+        setIsChecking(false);
+        return;
+      }
+      
+      // If not in local state, check the database
+      const bookmarkStatus = await checkIsBookmarked(article.id);
       console.log(`[BookmarkButton] Article ${article.id} is ${bookmarkStatus ? 'bookmarked' : 'not bookmarked'}`);
       setIsMarked(bookmarkStatus);
     } catch (error) {
@@ -49,11 +60,12 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     } finally {
       setIsChecking(false);
     }
-  }, [user, article]);
-  
+  }, [user, article, bookmarkedIds, checkIsBookmarked]);
+
+  // Check bookmark status on mount and when user/article changes
   useEffect(() => {
     checkBookmarkStatus();
-  }, [checkBookmarkStatus]);
+  }, [checkBookmarkStatus, user, article.id]);
 
   // Reset bookmark state when user logs out
   useEffect(() => {
@@ -66,44 +78,25 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // Prevent multiple clicks during processing
-    if (isProcessing) return;
     
-    // Redirect to sign in if user is not authenticated
     if (!user) {
+      console.log('[BookmarkButton] No user logged in, redirecting to signin');
       router.push('/signin');
       return;
     }
     
-    if (!article || !article.id) {
-      console.error('[BookmarkButton] Invalid article data:', article);
+    if (isProcessing) {
+      console.log('[BookmarkButton] Already processing a bookmark action');
       return;
     }
-
+    
+    setIsProcessing(true);
     try {
-      setIsProcessing(true);
+      console.log(`[BookmarkButton] Toggling bookmark for article: ${article.title}`);
+      const success = await toggleBookmark(article);
       
-      if (isMarked) {
-        console.log(`[BookmarkButton] Removing bookmark for article: ${article.title} (${article.id})`);
-        const success = await removeBookmark(user.uid, article.id);
-        if (success) {
-          setIsMarked(false);
-          console.log('[BookmarkButton] Bookmark removed successfully');
-          
-          // Force refresh if we're on the favorites page
-          if (window.location.pathname.includes('/favorites')) {
-            console.log('[BookmarkButton] On favorites page, reloading page to refresh bookmarks');
-            window.location.reload();
-          }
-        }
-      } else {
-        console.log(`[BookmarkButton] Adding bookmark for article: ${article.title} (${article.id})`);
-        const success = await addBookmark(user.uid, article);
-        if (success) {
-          setIsMarked(true);
-          console.log('[BookmarkButton] Bookmark added successfully');
-        }
+      if (success !== undefined) {
+        setIsMarked(success);
       }
     } catch (error) {
       console.error('[BookmarkButton] Error toggling bookmark:', error);

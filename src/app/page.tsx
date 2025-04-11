@@ -7,7 +7,8 @@ import Sidebar from './components/Sidebar';
 import NewsGrid from './components/NewsGrid';
 import LatestNews from './components/LatestNews';
 import React, { useEffect, useCallback } from 'react';
-import { useNews } from './context/NewsContext';
+import { useArticles } from './context/ArticleContext';
+import { useSearch } from './context/SearchContext';
 import { UnifiedArticle } from './types/news';
 
 const Home: React.FC = () => {
@@ -21,13 +22,16 @@ const Home: React.FC = () => {
     loadMoreLatestNews,
     latestNewsLoading,
     hasMoreLatestNews,
+    refreshNews
+  } = useArticles();
+  
+  const {
     searchResults,
     searchLoading,
     searchTerm,
     searchNews,
-    clearSearch,
-    refreshNews
-  } = useNews();
+    clearSearch
+  } = useSearch();
 
   // Log navigation to this page
   useEffect(() => {
@@ -67,7 +71,7 @@ const Home: React.FC = () => {
     
     console.log(`[Home] Changing category from ${activeCategory} to ${category}`);
     
-    // Change the active category - this will trigger the useEffect in NewsContext
+    // Change the active category - this will trigger the useEffect in ArticleContext
     setActiveCategory(category);
     
     // Clear search when changing categories

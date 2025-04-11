@@ -279,4 +279,43 @@ export async function getBreakingNews(): Promise<UnifiedArticle[]> {
     console.error('Error fetching breaking news:', error);
     return [];
   }
-} 
+}
+
+/**
+ * Search for news articles across all sources
+ * @param searchTerm The term to search for
+ * @returns A promise that resolves to an array of unified articles
+ */
+export const searchNews = async (searchTerm: string): Promise<UnifiedArticle[]> => {
+  try {
+    console.log(`[newsService] Searching for: ${searchTerm}`);
+    
+    // Search in NewsAPI - use the everything endpoint with search parameters
+    const newsApiResults = await getTopHeadlinesByCategory('general', true);
+    
+    // Filter NewsAPI results by search term
+    const filteredNewsApiResults = newsApiResults.filter(article => 
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    // Search in NYTimes
+    const nyTimesResults = await getTopStoriesBySection('home', true);
+    
+    // Filter NYTimes results by search term
+    const filteredNYTimesResults = nyTimesResults.filter(article => 
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    // Combine and deduplicate results
+    const allResults = [...filteredNewsApiResults, ...filteredNYTimesResults];
+    const uniqueResults = combineAndDeduplicate([allResults]);
+    
+    console.log(`[newsService] Found ${uniqueResults.length} unique articles for search: ${searchTerm}`);
+    return uniqueResults;
+  } catch (error) {
+    console.error('[newsService] Error searching news:', error);
+    return [];
+  }
+}; 

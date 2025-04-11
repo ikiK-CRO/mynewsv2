@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import styles from './SearchSection.module.scss';
 import React, { useState } from 'react';
+import { useSearch } from '../context/SearchContext';
 
 interface SearchSectionProps {
-  onSearch: (searchTerm: string) => void;
+  onSearch?: (searchTerm: string) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { searchNews: contextSearch, searchTerm: contextSearchTerm } = useSearch();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -16,7 +18,12 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      onSearch(searchTerm.trim());
+      // Use the context search function if no onSearch prop is provided
+      if (onSearch) {
+        onSearch(searchTerm.trim());
+      } else {
+        contextSearch(searchTerm.trim());
+      }
     }
   };
 
