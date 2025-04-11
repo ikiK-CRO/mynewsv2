@@ -109,8 +109,10 @@ export function mapNewsApiToUnified(article: NewsApiArticle): UnifiedArticle {
 /**
  * Get top headlines by category and convert to unified format
  */
-export async function getTopHeadlinesByCategory(category: string = ''): Promise<UnifiedArticle[]> {
+export async function getTopHeadlinesByCategory(category: string = '', forceRefresh: boolean = false): Promise<UnifiedArticle[]> {
   try {
+    // Add timestamp to force cache invalidation if needed
+    const timestamp = forceRefresh ? `&_t=${Date.now()}` : '';
     const data = await fetchTopHeadlines(category);
     return data.articles.map(article => mapNewsApiToUnified({
       ...article,

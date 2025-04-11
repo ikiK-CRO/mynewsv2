@@ -148,12 +148,15 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
  * Get news by category
  * Uses both sources to ensure diverse news
  */
-export async function getNewsByCategory(category: string = 'general'): Promise<UnifiedArticle[]> {
+export async function getNewsByCategory(category: string = 'general', forceRefresh: boolean = false): Promise<UnifiedArticle[]> {
   try {
     // Map our app categories to NYTimes sections
     const nyTimesSection = category === 'general' ? 'home' : category;
     
-    console.log(`[newsService] Fetching news for category: ${category}, NYT section: ${nyTimesSection}`);
+    console.log(`[newsService] Fetching news for category: ${category}, NYT section: ${nyTimesSection}${forceRefresh ? ' (forced refresh)' : ''}`);
+    
+    // Add timestamp to force cache invalidation if needed
+    const timestamp = forceRefresh ? `&_t=${Date.now()}` : '';
     
     // Attempt to fetch from both sources for diversity, but limit to 2 API calls
     const results = await Promise.allSettled([

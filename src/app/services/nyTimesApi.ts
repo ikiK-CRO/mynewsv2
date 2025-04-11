@@ -205,8 +205,10 @@ export async function getMostPopularArticles(period: number = 1): Promise<Unifie
 /**
  * Get top stories from NYTimes by section and convert to unified format
  */
-export async function getTopStoriesBySection(section: string = 'home'): Promise<UnifiedArticle[]> {
+export async function getTopStoriesBySection(section: string = 'home', forceRefresh: boolean = false): Promise<UnifiedArticle[]> {
   try {
+    // Add timestamp to force cache invalidation if needed
+    const timestamp = forceRefresh ? `&_t=${Date.now()}` : '';
     const data = await fetchTopStories(section);
     return data.results.map(mapNYTimesTopStoryToUnified);
   } catch (error) {

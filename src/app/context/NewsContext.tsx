@@ -126,7 +126,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [activeCategory]);
   
-  const fetchNews = useCallback(async () => {
+  const fetchNews = useCallback(async (forceRefresh: boolean = false) => {
     if (isLoadingRef.current || !isMounted.current) {
       console.log('[NewsContext] Skipping fetch - already loading or unmounted');
       return;
@@ -142,9 +142,11 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     
-    console.log(`[NewsContext] Fetching news for category: ${activeCategory}`);
+    console.log(`[NewsContext] Fetching news for category: ${activeCategory}${forceRefresh ? ' (forced refresh)' : ''}`);
     
     try {
+      // Add timestamp to force cache invalidation if needed
+      const timestamp = forceRefresh ? `&_t=${Date.now()}` : '';
       const categoryArticles = await getNewsByCategory(activeCategory);
       
       if (!isMounted.current) return;
@@ -201,7 +203,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     
     if (!initialLoadDone.current && activeCategory === lastCategoryRef.current) {
       console.log('[NewsContext] Initial load - fetching news');
-      fetchNews();
+      fetchNews(true);
       return;
     }
     
@@ -211,14 +213,14 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       
       setArticles([]);
       
-      fetchNews();
+      fetchNews(true);
     }
     
     const currentAuth = !!user;
     if (currentAuth !== lastAuthStateRef.current) {
       console.log(`[NewsContext] Auth state changed from ${lastAuthStateRef.current} to ${currentAuth}`);
       lastAuthStateRef.current = currentAuth;
-      fetchNews();
+      fetchNews(true);
     }
   }, [activeCategory, user, fetchNews]);
   
@@ -287,7 +289,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
   
   const refreshNews = useCallback(async () => {
-    await fetchNews();
+    await fetchNews(true); // Force refresh when manually refreshing
   }, [fetchNews]);
   
   const value = {

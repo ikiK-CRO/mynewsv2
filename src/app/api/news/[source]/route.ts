@@ -12,8 +12,8 @@ type CacheEntry = {
 };
 
 const cache: Record<string, CacheEntry> = {};
-// Cache duration: 1 hour
-const CACHE_DURATION = 1 * 60 * 60 * 1000;
+// Cache duration: 5 minutes (reduced from 1 hour to ensure fresher content)
+const CACHE_DURATION = 5 * 60 * 1000;
 
 // Track daily API usage to avoid hitting limits
 let newsApiRequestCount = 0;
