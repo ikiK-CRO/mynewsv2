@@ -45,66 +45,58 @@ export const useNews = () => {
   return context;
 };
 
-// Provider component
-export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State for articles
+/**
+ * Context provider for news-related state and functionality
+ * Manages articles, categories, sources, and loading states
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ */
+export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
   const [articles, setArticles] = useState<UnifiedArticle[]>([]);
   const [latestNews, setLatestNews] = useState<UnifiedArticle[]>([]);
   const [breakingNews, setBreakingNews] = useState<UnifiedArticle[]>([]);
   
-  // Loading states
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Category state
   const [activeCategory, setActiveCategory] = useState<string>('general');
+  const [activeSource, setActiveSource] = useState<string>('newsapi');
   
-  // Search state
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<UnifiedArticle[]>([]);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   
-  // Pagination state for latest news
   const [latestNewsPage, setLatestNewsPage] = useState<number>(1);
   const [latestNewsLoading, setLatestNewsLoading] = useState<boolean>(false);
   const [hasMoreLatestNews, setHasMoreLatestNews] = useState<boolean>(true);
   
-  // Get current auth state
   const { user } = useAuth();
   
-  // Refs to prevent unnecessary fetches
   const isMounted = useRef(true);
   const isLoadingRef = useRef<boolean>(false);
   const lastCategoryRef = useRef<string>(activeCategory);
   const lastAuthStateRef = useRef<boolean>(!!user);
   const initialLoadDone = useRef<boolean>(false);
   
-  // Local storage keys
   const CATEGORY_STORAGE_KEY = 'news_app_state';
   const NAVIGATION_STORAGE_KEY = 'news_navigation_state';
   
-  // Load saved state from local storage on initial mount
   useEffect(() => {
     try {
-      // Check for navigation flags first
       const navigationState = localStorage.getItem(NAVIGATION_STORAGE_KEY);
       if (navigationState) {
         const { from_signin, from_favorites, timestamp } = JSON.parse(navigationState);
         
-        // Only use navigation flags if they're recent (< 10 seconds)
         const isRecent = (Date.now() - timestamp) < 10000;
         
         if (isRecent) {
           console.log(`[NewsContext] Detected navigation from ${from_signin ? 'signin' : 'favorites'}`);
-          // Force a refresh by clearing the initialLoadDone flag
           initialLoadDone.current = false;
           
-          // Clear the navigation flag
           localStorage.removeItem(NAVIGATION_STORAGE_KEY);
         }
       }
       
-      // Then check for saved category
       const savedState = localStorage.getItem(CATEGORY_STORAGE_KEY);
       if (savedState) {
         const { category } = JSON.parse(savedState);
@@ -123,7 +115,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
   
-  // Save category to local storage when it changes
   useEffect(() => {
     try {
       localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify({ 
@@ -135,14 +126,12 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeCategory]);
   
-  // Fetch news when category changes or auth state changes
   const fetchNews = useCallback(async () => {
     if (isLoadingRef.current || !isMounted.current) {
       console.log('[NewsContext] Skipping fetch - already loading or unmounted');
       return;
     }
     
-    // Skip fetching for favorites category
     if (activeCategory === 'favorites') {
       console.log('[NewsContext] Skipping API calls for favorites category');
       setLoading(false);
@@ -156,7 +145,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log(`[NewsContext] Fetching news for category: ${activeCategory}`);
     
     try {
-      // Fetch category articles first
       const categoryArticles = await getNewsByCategory(activeCategory);
       
       if (!isMounted.current) return;
@@ -168,7 +156,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn(`[NewsContext] Received 0 articles for ${activeCategory}`);
       }
       
-      // Fetch latest news and breaking news in parallel
       Promise.all([
         getLatestNews(1),
         getBreakingNews()
@@ -185,11 +172,9 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setBreakingNews(breaking);
         }
         
-        // Update pagination state
         setLatestNewsPage(1);
         setHasMoreLatestNews(latest.length > 0);
         
-        // Update refs
         lastCategoryRef.current = activeCategory;
         lastAuthStateRef.current = !!user;
         initialLoadDone.current = true;
@@ -204,37 +189,31 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       if (!isMounted.current) return;
       
-      setError(err instanceof Error ? err : new Error('Failed to fetch news'));
+      setError(err instanceof Error ? err.message : 'Failed to fetch news');
       console.error('[NewsContext] Error fetching news:', err);
       setLoading(false);
       isLoadingRef.current = false;
     }
   }, [activeCategory, user]);
   
-  // Detect category changes and trigger fetch
   useEffect(() => {
     console.log(`[NewsContext] Category effect - current: ${activeCategory}, last: ${lastCategoryRef.current}`);
     
-    // Skip if we're just initializing and haven't changed category
     if (!initialLoadDone.current && activeCategory === lastCategoryRef.current) {
       console.log('[NewsContext] Initial load - fetching news');
       fetchNews();
       return;
     }
     
-    // If category changed, update the ref and fetch new data
     if (activeCategory !== lastCategoryRef.current) {
       console.log(`[NewsContext] Category changed from ${lastCategoryRef.current} to ${activeCategory}`);
       lastCategoryRef.current = activeCategory;
       
-      // Clear articles immediately when category changes to avoid showing stale data
       setArticles([]);
       
-      // Fetch news for the new category
       fetchNews();
     }
     
-    // If auth state changed, also fetch new data
     const currentAuth = !!user;
     if (currentAuth !== lastAuthStateRef.current) {
       console.log(`[NewsContext] Auth state changed from ${lastAuthStateRef.current} to ${currentAuth}`);
@@ -243,7 +222,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeCategory, user, fetchNews]);
   
-  // Load more latest news
   const loadMoreLatestNews = useCallback(async () => {
     if (latestNewsLoading || !hasMoreLatestNews || !isMounted.current) return;
     
@@ -259,7 +237,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setLatestNewsPage(nextPage);
         
-        // Add new items avoiding duplicates
         setLatestNews(prev => {
           const prevIds = new Set(prev.map(article => article.id));
           const uniqueNewArticles = moreLatestNews.filter(article => !prevIds.has(article.id));
@@ -275,24 +252,20 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [latestNewsPage, latestNewsLoading, hasMoreLatestNews]);
   
-  // Search functionality
   const searchNews = useCallback((term: string) => {
     setSearchTerm(term);
     setSearchLoading(true);
     
-    // Combine all articles for searching
     const allArticles = [
       ...articles,
       ...latestNews,
       ...breakingNews
     ];
     
-    // Remove duplicates
     const uniqueArticles = Array.from(
       new Map(allArticles.map(article => [article.id, article])).values()
     );
     
-    // Filter based on search term
     const results = uniqueArticles.filter(article => {
       const searchLower = term.toLowerCase();
       return (
@@ -308,18 +281,15 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSearchLoading(false);
   }, [articles, latestNews, breakingNews]);
   
-  // Clear search
   const clearSearch = useCallback(() => {
     setSearchTerm('');
     setSearchResults([]);
   }, []);
   
-  // Manual refresh function
   const refreshNews = useCallback(async () => {
     await fetchNews();
   }, [fetchNews]);
   
-  // Context value
   const value = {
     articles,
     latestNews,

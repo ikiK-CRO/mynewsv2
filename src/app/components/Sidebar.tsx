@@ -100,6 +100,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategor
   const router = useRouter();
   const { user } = useAuth();
 
+  /**
+   * Handles the click event on a sidebar item
+   * @param {string} category - The category that was clicked
+   * @param {boolean} requiresAuth - Whether this item requires authentication
+   * @param {React.MouseEvent} e - The click event object
+   */
   const handleItemClick = (category: string, requiresAuth: boolean = false, e: React.MouseEvent) => {
     console.log(`[Sidebar] Item clicked: ${category}, requiresAuth: ${requiresAuth}`);
     

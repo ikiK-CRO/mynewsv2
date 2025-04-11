@@ -33,6 +33,16 @@ function checkAndResetCounter() {
   }
 }
 
+/**
+ * API route handler for news sources
+ * Proxies requests to external news APIs (NewsAPI and NYTimes)
+ * Implements caching and rate limiting
+ * 
+ * @param {NextRequest} request - The incoming request
+ * @param {Object} params - Route parameters
+ * @param {string} params.source - The news source to fetch from ('newsapi' or 'nytimes')
+ * @returns {Promise<NextResponse>} The API response
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: { source: string } }

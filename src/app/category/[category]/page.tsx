@@ -9,11 +9,22 @@ interface CategoryPageProps {
   };
 }
 
-// This page redirects to home page with the selected category
+/**
+ * Category page component that redirects to home with the selected category
+ * This page acts as a redirect handler for category navigation
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.params - Route parameters
+ * @param {string} props.params.category - The category to redirect to
+ */
 export default function CategoryPage({ params }: CategoryPageProps) {
   const router = useRouter();
   const { category } = params;
   
+  /**
+   * Effect to handle the redirect
+   * Stores the category in localStorage and redirects to home
+   */
   useEffect(() => {
     // Store the category in localStorage
     try {

@@ -9,12 +9,22 @@ interface BookmarkedArticle extends UnifiedArticle {
   bookmarkedAt?: string;
 }
 
+/**
+ * Custom hook for managing bookmarked articles
+ * Provides functionality to fetch, add, remove, and check bookmarked articles
+ * @returns {Object} Object containing bookmarks state and functions to manage bookmarks
+ */
 export const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  /**
+   * Fetches bookmarks for the current user
+   * Resets state if no user is authenticated
+   * @returns {Promise<BookmarkedArticle[]>} Array of bookmarked articles
+   */
   const fetchBookmarks = useCallback(async () => {
     // If no user, reset state and return
     if (!user) {
@@ -52,6 +62,12 @@ export const useBookmarks = () => {
     fetchBookmarks();
   }, [fetchBookmarks]);
 
+  /**
+   * Toggles the bookmark status of an article
+   * Adds the article to bookmarks if not bookmarked, removes it if already bookmarked
+   * @param {UnifiedArticle} article - The article to toggle bookmark status for
+   * @returns {Promise<boolean>} Success status of the operation
+   */
   const toggleBookmark = useCallback(async (article: UnifiedArticle) => {
     if (!user) {
       console.log('Cannot toggle bookmark - no authenticated user');
@@ -105,6 +121,11 @@ export const useBookmarks = () => {
     }
   }, [bookmarks, user]);
 
+  /**
+   * Checks if an article is bookmarked
+   * @param {string} articleId - The ID of the article to check
+   * @returns {boolean} Whether the article is bookmarked
+   */
   const isArticleBookmarked = useCallback((articleId: string) => {
     if (!articleId || !bookmarks.length) return false;
     return bookmarks.some(bookmark => bookmark.id === articleId);
