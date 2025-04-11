@@ -67,6 +67,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Send verification email
       await sendEmailVerification(userCredential.user);
       
+      // Sign out the user after registration
+      await signOut(auth);
+      
       return userCredential;
     } catch (error: any) {
       setError(error.message);
@@ -80,11 +83,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
       // Check if email is verified
-      setIsEmailVerified(userCredential.user.emailVerified);
-      
       if (!userCredential.user.emailVerified) {
-        console.log('Warning: Email is not verified');
+        // Sign out the user if email is not verified
+        await signOut(auth);
+        throw new Error('Please verify your email before signing in. Check your inbox for the verification link.');
       }
+      
+      // Set email verification status
+      setIsEmailVerified(true);
       
       return userCredential;
     } catch (error: any) {

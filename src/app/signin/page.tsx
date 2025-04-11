@@ -15,7 +15,7 @@ const SignIn: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
+    if (user && user.emailVerified) {
       // Mark return navigation in localStorage for better persistence
       try {
         localStorage.setItem('news_navigation_state', JSON.stringify({
@@ -43,16 +43,23 @@ const SignIn: React.FC = () => {
     try {
       setError(null);
       setLoading(true);
-      await signIn(email, password);
+      const userCredential = await signIn(email, password);
+      
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        setError('Please verify your email before signing in. Check your inbox for the verification link.');
+        return;
+      }
       
       // Login is successful - the useEffect above will handle redirect
-      // Cache clearing will happen in the useEffect
     } catch (err: any) {
       console.error('Sign in error:', err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError('Invalid email or password');
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email format');
+      } else if (err.message.includes('verify your email')) {
+        setError('Please verify your email before signing in. Check your inbox for the verification link.');
       } else {
         setError(err.message || 'Failed to sign in');
       }

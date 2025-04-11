@@ -2,9 +2,10 @@
 
 import styles from './LatestNews.module.scss';
 import Link from 'next/link';
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { UnifiedArticle } from '../types/news';
 import BookmarkButton from './BookmarkButton';
+import { useAuth } from '../context/AuthContext';
 
 interface LatestNewsProps {
   latestNews: UnifiedArticle[];
@@ -24,6 +25,13 @@ const LatestNews: React.FC<LatestNewsProps> = ({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const newsListRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const [key, setKey] = useState(0); // Add a key to force re-render
+
+  // Force re-render when auth state changes
+  useEffect(() => {
+    setKey(prev => prev + 1);
+  }, [user]);
 
   // Format time with date context
   const formatTime = (dateString: string): string => {
@@ -142,7 +150,7 @@ const LatestNews: React.FC<LatestNewsProps> = ({
   }
 
   return (
-    <aside className={styles.latestNews}>
+    <aside className={styles.latestNews} key={key}>
       <h2 className={styles.heading}>
         <span className={styles.icon}></span> Latest news
       </h2>

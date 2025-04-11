@@ -55,6 +55,14 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     checkBookmarkStatus();
   }, [checkBookmarkStatus]);
 
+  // Reset bookmark state when user logs out
+  useEffect(() => {
+    if (!user) {
+      setIsMarked(false);
+      setIsChecking(false);
+    }
+  }, [user]);
+
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
