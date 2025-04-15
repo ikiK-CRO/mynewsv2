@@ -5,6 +5,14 @@
   margin-top: v.$spacing-xxl;
   @include m.flex(row, flex-start, center, v.$spacing-xl);
   margin-left: v.$spacing-sm;
+  
+  @media (max-width: 768px) {
+    margin-top: 16px;
+    margin-left: 0;
+    padding: 0 16px;
+    justify-content: space-between;
+    width: 100%;
+  }
 }
 
 .logo {
@@ -17,11 +25,26 @@
   span {
     color: v.$color-primary;
   }
+  
+  @media (max-width: 768px) {
+    font-size: 32px;  // Larger size for mobile as per design
+  }
 }
 
 .searchWrapper {
   position: relative;
   width: 725px;
+  
+  @media (max-width: 768px) {
+    width: auto;
+    flex: 1;
+    max-width: calc(100% - 200px);
+    margin-left: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: calc(100% - 150px);
+  }
 }
 
 .searchInput {
@@ -40,6 +63,12 @@
     color: v.$color-text;
     opacity: 0.4;
   }
+  
+  @media (max-width: 768px) {
+    height: 44px;
+    padding: 0 15px 0 40px;
+    border-radius: 22px; // Rounded corners as per design
+  }
 }
 
 .searchIcon {
@@ -47,6 +76,11 @@
   width: 20px;
   height: 20px;
   color: v.$color-icon;
+  
+  @media (max-width: 768px) {
+    top: 12px;
+    left: 12px;
+  }
 }
 
 .searchButton {
@@ -60,8 +94,11 @@
   font-size: v.$font-size-base;
   line-height: 20px;
   text-transform: uppercase;
+  
+  @media (max-width: 768px) {
+    display: none; // Hide search button on mobile
+  }
 } 
-
 
 .logoLink {
   display: inline-block;
@@ -70,5 +107,29 @@
   
   &:hover {
     transform: scale(1.05);
+  }
+} 
+
+// Mobile menu button (hamburger)
+.mobileMenuButton {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 16px;
+  }
+  
+  .bar {
+    width: 24px;
+    height: 2px;
+    background-color: #1D1D1B;
+    border-radius: 1px;
   }
 } 

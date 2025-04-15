@@ -6,7 +6,7 @@ import Divider from './components/Divider';
 import Sidebar from './components/Sidebar';
 import NewsGrid from './components/NewsGrid';
 import LatestNews from './components/LatestNews';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useArticles } from './context/ArticleContext';
 import { useSearch } from './context/SearchContext';
 import { UnifiedArticle } from './types/news';
@@ -32,6 +32,9 @@ const Home: React.FC = () => {
     searchNews,
     clearSearch
   } = useSearch();
+  
+  // State for mobile tabs
+  const [activeTab, setActiveTab] = useState<'featured' | 'latest'>('featured');
 
   // Log navigation to this page
   useEffect(() => {
@@ -134,6 +137,11 @@ const Home: React.FC = () => {
     });
   }, [articles, breakingNews, searchTerm, searchResults]);
 
+  // Handle tab change
+  const handleTabChange = (tab: 'featured' | 'latest') => {
+    setActiveTab(tab);
+  };
+
   return (
     <main className={styles.container}>
       <SearchSection onSearch={handleSearch} />
@@ -155,24 +163,44 @@ const Home: React.FC = () => {
           />
         </div>
       ) : (
-        <div className={styles.contentGrid}>
-          <aside className={styles.sidebarContainer}>
-            <Sidebar activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
-          </aside>
-          <section className={styles.newsGridContainer}>
-            <h2 className={styles.sectionTitle}>News</h2>
-            <NewsGrid articles={allArticles} loading={loading} />
-          </section>
-          <aside className={styles.latestNewsContainer}>
-            <LatestNews 
-              latestNews={latestNews} 
-              loading={loading} 
-              loadMoreLatestNews={loadMoreLatestNews}
-              latestNewsLoading={latestNewsLoading}
-              hasMoreLatestNews={hasMoreLatestNews}
-            />
-          </aside>
-        </div>
+        <>
+          {/* Mobile tabs */}
+          <div className={styles.mobileTabs}>
+            <div className={`${styles.tabIndicator} ${activeTab === 'featured' ? styles.featuredActive : styles.latestActive}`}></div>
+            <button 
+              className={`${styles.mobileTab} ${activeTab === 'featured' ? styles.active : ''}`}
+              onClick={() => handleTabChange('featured')}
+            >
+              Featured
+            </button>
+            <button 
+              className={`${styles.mobileTab} ${activeTab === 'latest' ? styles.active : ''}`}
+              onClick={() => handleTabChange('latest')}
+            >
+              Latest
+            </button>
+          </div>
+          
+          {/* Desktop and tablet layout */}
+          <div className={styles.contentGrid}>
+            <aside className={styles.sidebarContainer}>
+              <Sidebar activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+            </aside>
+            <section className={`${styles.newsGridContainer} ${activeTab === 'featured' ? styles.active : ''}`}>
+              <h2 className={styles.sectionTitle}>News</h2>
+              <NewsGrid articles={allArticles} loading={loading} />
+            </section>
+            <aside className={`${styles.latestNewsContainer} ${activeTab === 'latest' ? styles.active : ''}`}>
+              <LatestNews 
+                latestNews={latestNews} 
+                loading={loading} 
+                loadMoreLatestNews={loadMoreLatestNews}
+                latestNewsLoading={latestNewsLoading}
+                hasMoreLatestNews={hasMoreLatestNews}
+              />
+            </aside>
+          </div>
+        </>
       )}
     </main>
   );

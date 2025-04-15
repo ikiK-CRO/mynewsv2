@@ -61,6 +61,11 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
           SEARCH
         </button>
       </form>
+      <button className={styles.mobileMenuButton}>
+        <div className={styles.bar}></div>
+        <div className={styles.bar}></div>
+        <div className={styles.bar}></div>
+      </button>
     </div>
   );
 };

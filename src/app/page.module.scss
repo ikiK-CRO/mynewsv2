@@ -67,6 +67,71 @@
   .sectionTitle {
     font-size: 20px;
   }
+  
+  // Hide standard news containers on mobile when tabs are active
+  .newsGridContainer,
+  .latestNewsContainer {
+    display: none;
+  }
+  
+  // Show only the active tab content
+  .newsGridContainer.active,
+  .latestNewsContainer.active {
+    display: block;
+  }
+}
+
+// Mobile tabs
+.mobileTabs {
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    width: 100%;
+    margin: 16px 0;
+    background-color: #F5F5F5;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+  }
+}
+
+.mobileTab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1D1D1B;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  
+  &.active {
+    font-weight: 600;
+    color: #1D1D1B;
+  }
+}
+
+.tabIndicator {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  background-color: #FFFFFF;
+  border-radius: 22px;
+  transition: transform 0.3s ease;
+  z-index: 1;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  
+  &.featuredActive {
+    transform: translateX(0);
+  }
+  
+  &.latestActive {
+    transform: translateX(100%);
+  }
 }
 
 .searchResults {
