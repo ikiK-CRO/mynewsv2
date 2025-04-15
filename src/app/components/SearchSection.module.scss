@@ -5,7 +5,14 @@
   margin-top: v.$spacing-xxl;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   margin-left: v.$spacing-sm;
+  
+  @media (min-width: 769px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
   
   @media (max-width: 768px) {
     margin-top: 24px;
@@ -21,9 +28,11 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  margin-bottom: 16px;
   
-  @media (max-width: 768px) {
-    margin-bottom: 16px;
+  @media (min-width: 769px) {
+    width: auto;
+    margin-bottom: 0;
   }
 }
 
@@ -45,10 +54,14 @@
 
 .searchWrapper {
   position: relative;
-  width: 725px;
+  width: 100%;
+  
+  @media (min-width: 769px) {
+    max-width: 725px;
+    flex-grow: 1;
+  }
   
   @media (max-width: 768px) {
-    width: 100%;
     margin-left: 0;
   }
 }

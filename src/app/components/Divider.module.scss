@@ -3,6 +3,10 @@
 
 .divider {
   background-color: #EAECF0;
+  
+  @media (max-width: 768px) {
+    display: none; // Hide divider on mobile
+  }
 }
 
 .horizontal {

@@ -10,6 +10,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useArticles } from './context/ArticleContext';
 import { useSearch } from './context/SearchContext';
 import { UnifiedArticle } from './types/news';
+import { icons } from './components/icons';
 
 const Home: React.FC = () => {
   const { 
@@ -141,6 +142,47 @@ const Home: React.FC = () => {
   const handleTabChange = (tab: 'featured' | 'latest') => {
     setActiveTab(tab);
   };
+
+  // Get the right category label and icon
+  const getCategoryInfo = () => {
+    let label = 'Home';
+    let icon = icons.home;
+
+    switch (activeCategory) {
+      case 'general':
+        label = 'Home';
+        icon = icons.home;
+        break;
+      case 'business':
+        label = 'Business';
+        icon = icons.business;
+        break;
+      case 'health':
+        label = 'Health';
+        icon = icons.health;
+        break;
+      case 'science':
+        label = 'Science';
+        icon = icons.science;
+        break;
+      case 'sports':
+        label = 'Sports';
+        icon = icons.sports;
+        break;
+      case 'technology':
+        label = 'Technology';
+        icon = icons.technology;
+        break;
+      case 'favorites':
+        label = 'Favorites';
+        icon = icons.favorites;
+        break;
+    }
+
+    return { label, icon };
+  };
+
+  const { label: categoryLabel, icon: categoryIcon } = getCategoryInfo();
 
   return (
     <main className={styles.container}>

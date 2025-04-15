@@ -2,6 +2,8 @@ import Link from 'next/link';
 import styles from './SearchSection.module.scss';
 import React, { useState } from 'react';
 import { useSearch } from '../context/SearchContext';
+import MobileMenu from './MobileMenu';
+import { useArticles } from '../context/ArticleContext';
 
 interface SearchSectionProps {
   onSearch?: (searchTerm: string) => void;
@@ -10,6 +12,8 @@ interface SearchSectionProps {
 const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { searchNews: contextSearch, searchTerm: contextSearchTerm } = useSearch();
+  const { activeCategory, setActiveCategory } = useArticles();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -27,6 +31,14 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
     }
   };
 
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <div className={styles.searchSection}>
       <div className={styles.headerRow}>
@@ -35,7 +47,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
             <span>My</span>News
           </div>
         </Link>
-        <button className={styles.mobileMenuButton}>
+        <button className={styles.mobileMenuButton} onClick={handleMobileMenuToggle}>
           <div className={styles.bar}></div>
           <div className={styles.bar}></div>
           <div className={styles.bar}></div>
@@ -69,6 +81,15 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
           SEARCH
         </button>
       </form>
+
+      {isMobileMenuOpen && (
+        <MobileMenu 
+          activeCategory={activeCategory}
+          onCategoryChange={handleCategoryChange}
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </div>
   );
 };
