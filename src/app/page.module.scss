@@ -11,6 +11,10 @@
   color: #1D1D1B;
   margin-top: 0px; /* Updated to be 30px from divider */
   margin-bottom: 16px;
+  
+  @media (max-width: 768px) {
+    display: none; // Hide section title on mobile
+  }
 }
 
 .contentGrid {
@@ -88,11 +92,12 @@
   @media (max-width: 768px) {
     display: flex;
     width: 100%;
-    margin: 16px 0;
+    margin: 8px 0 12px 0;
     background-color: #F5F5F5;
     border-radius: 22px;
     overflow: hidden;
     position: relative;
+    padding: 0 16px;
   }
 }
 
@@ -145,6 +150,10 @@
     margin-bottom: 16px;
     font-size: 24px;
     font-weight: 600;
+    
+    @media (max-width: 768px) {
+      display: flex; // Override display:none for search results title
+    }
   }
 }
 

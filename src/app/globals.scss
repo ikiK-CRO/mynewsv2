@@ -32,4 +32,8 @@ a {
 
 .container {
   @include m.container;
+  
+  @media (max-width: 768px) {
+    padding: 0; // Remove padding on mobile as each component handles its own padding
+  }
 } 

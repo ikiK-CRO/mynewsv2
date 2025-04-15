@@ -29,11 +29,19 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
 
   return (
     <div className={styles.searchSection}>
-      <Link href="/" className={styles.logoLink}>
-        <div className={styles.logo}>
-          <span>My</span>News
-        </div>
-      </Link>
+      <div className={styles.headerRow}>
+        <Link href="/" className={styles.logoLink}>
+          <div className={styles.logo}>
+            <span>My</span>News
+          </div>
+        </Link>
+        <button className={styles.mobileMenuButton}>
+          <div className={styles.bar}></div>
+          <div className={styles.bar}></div>
+          <div className={styles.bar}></div>
+        </button>
+      </div>
+      
       <form className={styles.searchWrapper} onSubmit={handleSearchSubmit}>
         <svg
           className={styles.searchIcon}
@@ -61,11 +69,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
           SEARCH
         </button>
       </form>
-      <button className={styles.mobileMenuButton}>
-        <div className={styles.bar}></div>
-        <div className={styles.bar}></div>
-        <div className={styles.bar}></div>
-      </button>
     </div>
   );
 };

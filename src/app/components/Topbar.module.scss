@@ -12,6 +12,10 @@
     position: center;
     repeat: no-repeat;
   }
+  
+  @media (max-width: 768px) {
+    display: none; // Hide topbar on mobile
+  }
 }
 
 .topbarContent {
