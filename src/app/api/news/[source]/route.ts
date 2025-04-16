@@ -33,24 +33,25 @@ function checkAndResetCounter() {
   }
 }
 
-// Define params as a simple record for type safety
-type Params = {
+interface RouteSegmentProps {
   params: {
-    source: string
-  }
+    source: string;
+  };
 }
 
 // API route handler with the precise Next.js App Router signature
 export async function GET(
   request: NextRequest,
-  params: Params
+  { params }: RouteSegmentProps
 ): Promise<NextResponse> {
   try {
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // Extract source from params using the correct structure
-    const source = params.params.source;
+    // IMPORTANT: Next.js requires params to be awaited before accessing properties
+    // This is essential for dynamic route parameters in App Router
+    const resolvedParams = await Promise.resolve(params);
+    const source = resolvedParams.source;
     
     console.log(`Processing request for source: ${source}`);
     
