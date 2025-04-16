@@ -4,6 +4,7 @@ import styles from './MobileMenu.module.scss';
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { icons } from './icons';
+import { useSearch } from '../context/SearchContext';
 
 interface MobileMenuProps {
   activeCategory: string;
@@ -19,6 +20,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose
 }) => {
   const router = useRouter();
+  const { clearSearch } = useSearch();
   
   const categoryItems = [
     { id: 'all', label: 'Home', icon: icons.home },
@@ -35,14 +37,28 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     onClose();
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Reset category to 'all'
+    onCategoryChange('all');
+    // Clear any active search
+    clearSearch();
+    // Navigate to home page
+    router.push('/');
+    // Close the mobile menu
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className={styles.mobileMenuWrapper}>
       <div className={styles.mobileMenuHeader}>
-        <div className={styles.logo}>
-          <span>My</span>News
-        </div>
+        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
+          <div className={styles.logo}>
+            <span>My</span>News
+          </div>
+        </a>
         <button className={styles.closeButton} onClick={onClose}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18" stroke="#1D1D1B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

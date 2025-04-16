@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useSearch } from '../context/SearchContext';
 import MobileMenu from './MobileMenu';
 import { useArticles } from '../context/ArticleContext';
+import { useRouter } from 'next/navigation';
 
 interface SearchSectionProps {
   onSearch?: (searchTerm: string) => void;
@@ -11,9 +12,10 @@ interface SearchSectionProps {
 
 const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { searchNews: contextSearch, searchTerm: contextSearchTerm } = useSearch();
+  const { searchNews: contextSearch, searchTerm: contextSearchTerm, clearSearch } = useSearch();
   const { activeCategory, setActiveCategory } = useArticles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -39,14 +41,24 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Reset category to 'all'
+    setActiveCategory('all');
+    // Clear any active search
+    clearSearch();
+    // Navigate to home page
+    router.push('/');
+  };
+
   return (
     <div className={styles.searchSection}>
       <div className={styles.headerRow}>
-        <Link href="/" className={styles.logoLink}>
+        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
           <div className={styles.logo}>
             <span>My</span>News
           </div>
-        </Link>
+        </a>
         <button className={styles.mobileMenuButton} onClick={handleMobileMenuToggle}>
           <div className={styles.bar}></div>
           <div className={styles.bar}></div>

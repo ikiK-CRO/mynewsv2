@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import styles from './signup.module.scss';
+import { useArticles } from '../context/ArticleContext';
+import { useSearch } from '../context/SearchContext';
 
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -17,6 +19,8 @@ const SignUp: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const { signUp, user } = useAuth();
   const router = useRouter();
+  const { setActiveCategory } = useArticles();
+  const { clearSearch } = useSearch();
 
   useEffect(() => {
     if (user) {
@@ -71,15 +75,25 @@ const SignUp: React.FC = () => {
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Reset category to 'all'
+    setActiveCategory('all');
+    // Clear any active search
+    clearSearch();
+    // Navigate to home page
+    router.push('/');
+  };
+
   if (success) {
     return (
       <div className={styles.container}>
         <div className={styles.formWrapper}>
-          <Link href="/" className={styles.logoLink}>
+          <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
             <div className={styles.logo}>
               <span>My</span>News
             </div>
-          </Link>
+          </a>
           
           <h1 className={styles.title}>Email Verification Required</h1>
           <div className={styles.verificationInfo}>
@@ -110,11 +124,11 @@ const SignUp: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        <Link href="/" className={styles.logoLink}>
+        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
           <div className={styles.logo}>
             <span>My</span>News
           </div>
-        </Link>
+        </a>
         
         <h1 className={styles.title}>Create an Account</h1>
         <p className={styles.subtitle}>Sign up to save your favorite articles<br /><small>Email verification will be required</small></p>

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import styles from './signin.module.scss';
+import { useArticles } from '../context/ArticleContext';
+import { useSearch } from '../context/SearchContext';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +15,8 @@ const SignIn: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
   const router = useRouter();
+  const { setActiveCategory } = useArticles();
+  const { clearSearch } = useSearch();
 
   useEffect(() => {
     if (user && user.emailVerified) {
@@ -68,14 +72,24 @@ const SignIn: React.FC = () => {
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Reset category to 'all'
+    setActiveCategory('all');
+    // Clear any active search
+    clearSearch();
+    // Navigate to home page
+    router.push('/');
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        <Link href="/" className={styles.logoLink}>
+        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
           <div className={styles.logo}>
             <span>My</span>News
           </div>
-        </Link>
+        </a>
         
         <h1 className={styles.title}>Sign In</h1>
         <p className={styles.subtitle}>Welcome back! Sign in to access your account</p>
