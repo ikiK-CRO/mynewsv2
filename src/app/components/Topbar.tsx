@@ -5,15 +5,23 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 const Topbar: React.FC = () => {
   const router = useRouter();
-  const { user, logOut } = useAuth();
+  const { user } = useAuth();
 
   const handleAuthAction = async () => {
     if (user) {
-      await logOut();
-      router.push('/');
+      try {
+        // Instead of using the context's logOut function, use Firebase's signOut directly
+        await signOut(auth);
+        // Force redirect to home immediately after logout
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
     } else {
       router.push('/signin');
     }

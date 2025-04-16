@@ -10,6 +10,8 @@ import NewsGrid from '../components/NewsGrid';
 import Sidebar from '../components/Sidebar';
 import Divider from '../components/Divider';
 import SearchSection from '../components/SearchSection';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 const FavoritesPage: React.FC = () => {
   const { user, loading: authLoading, logOut } = useAuth();
@@ -76,8 +78,10 @@ const FavoritesPage: React.FC = () => {
 
   const handleLogOut = async () => {
     try {
-      await logOut();
-      router.push('/');
+      // Use Firebase's signOut directly
+      await signOut(auth);
+      // Force redirect to home immediately
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
     }

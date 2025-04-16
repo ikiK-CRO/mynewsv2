@@ -18,7 +18,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<UserCredential>;
   signIn: (email: string, password: string) => Promise<UserCredential>;
-  logOut: () => Promise<void>;
+  logOut: () => Promise<boolean>;
   error: string | null;
   isEmailVerified: boolean;
   resendVerificationEmail: () => Promise<void>;
@@ -103,6 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       await signOut(auth);
+      return true;
     } catch (error: any) {
       setError(error.message);
       throw error;
