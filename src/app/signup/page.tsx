@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import styles from './signup.module.scss';
 import { useArticles } from '../context/ArticleContext';
 import { useSearch } from '../context/SearchContext';
+import SearchSection from '../components/SearchSection';
+import Divider from '../components/Divider';
 
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -88,13 +90,12 @@ const SignUp: React.FC = () => {
   if (success) {
     return (
       <div className={styles.container}>
+        <div className={styles.headerSection}>
+          <SearchSection hideSearch={true} />
+          <Divider />
+        </div>
+        
         <div className={styles.formWrapper}>
-          <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
-            <div className={styles.logo}>
-              <span>My</span>News
-            </div>
-          </a>
-          
           <h1 className={styles.title}>Email Verification Required</h1>
           <div className={styles.verificationInfo}>
             <svg className={styles.emailIcon} xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -123,13 +124,12 @@ const SignUp: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.headerSection}>
+        <SearchSection hideSearch={true} />
+        <Divider />
+      </div>
+      
       <div className={styles.formWrapper}>
-        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
-          <div className={styles.logo}>
-            <span>My</span>News
-          </div>
-        </a>
-        
         <h1 className={styles.title}>Create an Account</h1>
         <p className={styles.subtitle}>Sign up to save your favorite articles<br /><small>Email verification will be required</small></p>
         

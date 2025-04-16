@@ -9,6 +9,7 @@ import { UnifiedArticle } from '../types/news';
 import NewsGrid from '../components/NewsGrid';
 import Sidebar from '../components/Sidebar';
 import Divider from '../components/Divider';
+import SearchSection from '../components/SearchSection';
 
 const FavoritesPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -82,41 +83,47 @@ const FavoritesPage: React.FC = () => {
   }
   
   return (
-    <div className={styles.container}>
-      <div className={styles.sidebarContainer}>
-        <Sidebar activeCategory="favorites" />
+    <main className={styles.container}>
+      <div className={styles.headerSection}>
+        <SearchSection hideSearch={true} />
+        <Divider />
       </div>
-      <Divider orientation="vertical" />
-      <div className={styles.contentContainer}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Favorites</h1>
-          <p className={styles.subtitle}>Articles you've bookmarked for later</p>
-          <button 
-            className={styles.refreshButton}
-            onClick={fetchBookmarks}
-            disabled={loading}
-          >
-            Refresh Bookmarks
-          </button>
+
+      <div className={styles.mainContent}>
+        <div className={styles.sidebarContainer}>
+          <Sidebar activeCategory="favorites" />
         </div>
-        
-        {loading ? (
-          <div className={styles.loading}>Loading your bookmarks...</div>
-        ) : error ? (
-          <div className={styles.error}>{error}</div>
-        ) : bookmarks.length === 0 ? (
-          <div className={styles.empty}>
-            <h2>No bookmarks yet</h2>
-            <p>Start adding articles to your favorites by clicking the bookmark icon on any article.</p>
+        <div className={styles.contentContainer}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Favorites</h1>
+            <p className={styles.subtitle}>Articles you've bookmarked for later</p>
+            <button 
+              className={styles.refreshButton}
+              onClick={fetchBookmarks}
+              disabled={loading}
+            >
+              Refresh Bookmarks
+            </button>
           </div>
-        ) : (
-          <NewsGrid 
-            articles={bookmarks} 
-            loading={loading} 
-          />
-        )}
+          
+          {loading ? (
+            <div className={styles.loading}>Loading your bookmarks...</div>
+          ) : error ? (
+            <div className={styles.error}>{error}</div>
+          ) : bookmarks.length === 0 ? (
+            <div className={styles.empty}>
+              <h2>No bookmarks yet</h2>
+              <p>Start adding articles to your favorites by clicking the bookmark icon on any article.</p>
+            </div>
+          ) : (
+            <NewsGrid 
+              articles={bookmarks} 
+              loading={loading} 
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 

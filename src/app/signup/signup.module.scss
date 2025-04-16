@@ -4,17 +4,24 @@
 
 .container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 2rem;
   background-color: v.$color-background;
+}
+
+.headerSection {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 .formWrapper {
   width: 100%;
-  max-width: 550px;
+  max-width: 500px;
   padding: 2.5rem;
+  margin: 2rem auto;
   background-color: v.$color-white;
   border-radius: v.$border-radius-lg;
   box-shadow: 0px 1px 2px -1px v.$color-shadow;
@@ -22,26 +29,11 @@
 }
 
 .logoLink {
-  display: inline-block;
-  text-decoration: none;
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: scale(1.05);
-  }
+  display: none; /* Hide this since we're using SearchSection */
 }
 
 .logo {
-  @include m.font-black;
-  font-size: 32px;
-  line-height: 100%;
-  letter-spacing: 0;
-  color: v.$color-text;
-  margin-bottom: 2rem;
-  
-  span {
-    color: v.$color-primary;
-  }
+  display: none; /* Hide this since we're using SearchSection */
 }
 
 .title {
@@ -67,12 +59,13 @@
 
 .nameFields {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 1.5rem;
   width: 100%;
   
-  @media (max-width: 600px) {
-    flex-direction: column;
-    gap: 1.5rem;
+  @media (min-width: 601px) {
+    flex-direction: row;
+    gap: 1rem;
   }
 }
 
@@ -80,7 +73,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 1;
+  width: 100%;
 }
 
 .label {
@@ -90,11 +83,13 @@
 }
 
 .input {
+  width: 100%;
   padding: 0.75rem 1rem;
   font-size: v.$font-size-base;
   border: 1px solid v.$color-border;
   border-radius: v.$border-radius-md;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .input:focus {

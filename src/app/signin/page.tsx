@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import styles from './signin.module.scss';
 import { useArticles } from '../context/ArticleContext';
 import { useSearch } from '../context/SearchContext';
+import SearchSection from '../components/SearchSection';
+import Divider from '../components/Divider';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -84,13 +86,12 @@ const SignIn: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.headerSection}>
+        <SearchSection hideSearch={true} />
+        <Divider />
+      </div>
+      
       <div className={styles.formWrapper}>
-        <a href="/" className={styles.logoLink} onClick={handleLogoClick}>
-          <div className={styles.logo}>
-            <span>My</span>News
-          </div>
-        </a>
-        
         <h1 className={styles.title}>Sign In</h1>
         <p className={styles.subtitle}>Welcome back! Sign in to access your account</p>
         

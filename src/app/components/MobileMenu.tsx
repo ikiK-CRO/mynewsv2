@@ -35,6 +35,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
     onClose();
+    
+    // Navigate to home page with the selected category
+    router.push('/');
   };
 
   const handleLogoClick = (e: React.MouseEvent) => {
@@ -81,7 +84,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </button>
         ))}
         
-        <button className={styles.categoryChip} onClick={() => router.push('/favorites')}>
+        <button 
+          className={`${styles.categoryChip} ${activeCategory === 'favorites' ? styles.active : ''}`} 
+          onClick={() => {
+            onClose();
+            router.push('/favorites');
+          }}
+        >
           <div className={styles.iconWrapper}>
             {icons.favorites}
           </div>
