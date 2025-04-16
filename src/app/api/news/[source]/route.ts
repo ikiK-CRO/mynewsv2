@@ -40,8 +40,7 @@ function checkAndResetCounter() {
  * 
  * @param {NextRequest} request - The incoming request
  * @param {Object} context - Route context
- * @param {Object} context.params - Route parameters
- * @param {string} context.params.source - The news source to fetch from ('newsapi' or 'nytimes')
+ * @param {Object} context.params - Route parameters that must be awaited
  * @returns {Promise<NextResponse>} The API response
  */
 export async function GET(
@@ -52,7 +51,9 @@ export async function GET(
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    const { source } = context.params;
+    // IMPORTANT: Next.js requires params to be awaited in App Router
+    const params = await Promise.resolve(context.params);
+    const { source } = params;
     
     console.log(`Processing request for source: ${source}`);
     
