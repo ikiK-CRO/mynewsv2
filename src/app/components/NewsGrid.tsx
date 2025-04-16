@@ -54,6 +54,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const newsCardRefs = useRef<Map<string, HTMLElement>>(new Map());
   
   // Determine which articles to display based on search state
   const articlesToDisplay = useMemo(() => {
@@ -238,6 +239,39 @@ const NewsGrid: React.FC<NewsGridProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [articles.length, visibleCards, isLoading, loadMoreCards]);
 
+  // Add intersection observer for mobile to handle centered card title expansion
+  useEffect(() => {
+    // Only for mobile devices
+    if (typeof window === 'undefined' || window.innerWidth > 768 || newsCardRefs.current.size === 0) {
+      return;
+    }
+    
+    const observerOptions = {
+      root: null, // Use viewport
+      rootMargin: '-30% 0px -30% 0px', // Trigger when in the middle 40% of the screen
+      threshold: 0.7, // Card needs to be 70% visible
+    };
+    
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+        } else {
+          entry.target.classList.remove('in-view');
+        }
+      });
+    };
+    
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    
+    // Observe all news cards
+    newsCardRefs.current.forEach(card => {
+      observer.observe(card);
+    });
+    
+    return () => observer.disconnect();
+  }, [visibleArticles]); // Re-run when visible articles change
+
   if (loading) {
     return <div className={styles.loading}>Loading news...</div>;
   }
@@ -308,11 +342,15 @@ const NewsGrid: React.FC<NewsGridProps> = ({
 
   const renderArticle = (article: UnifiedArticle, index: number) => {
     const isBreakingNews = article.category === 'BREAKING';
+    const cardId = article.id || `article-${index}`;
     
     return (
       <article 
-        key={article.id || `article-${index}`} 
+        key={cardId} 
         className={`${styles.newsCard} ${isBreakingNews ? styles.breaking : ''} ${styles.fadeIn} ${styles[`delay-${index + 1}`]}`}
+        ref={el => {
+          if (el) newsCardRefs.current.set(cardId, el);
+        }}
       >
         {!isBreakingNews && (
           <img
