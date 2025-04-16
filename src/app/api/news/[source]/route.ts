@@ -39,21 +39,20 @@ function checkAndResetCounter() {
  * Implements caching and rate limiting
  * 
  * @param {NextRequest} request - The incoming request
- * @param {Object} params - Route parameters
- * @param {string} params.source - The news source to fetch from ('newsapi' or 'nytimes')
+ * @param {Object} context - Route context
+ * @param {Object} context.params - Route parameters
+ * @param {string} context.params.source - The news source to fetch from ('newsapi' or 'nytimes')
  * @returns {Promise<NextResponse>} The API response
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { source: string } }
+  context: { params: { source: string } }
 ) {
   try {
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // IMPORTANT: Next.js requires params object to be awaited in App Router
-    const awaitedParams = await Promise.resolve(params);
-    const { source } = awaitedParams;
+    const { source } = context.params;
     
     console.log(`Processing request for source: ${source}`);
     
