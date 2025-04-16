@@ -20,14 +20,14 @@
     "firebase-admin": "^13.2.0",
     "firebaseui": "^6.1.0",
     "next": "15.2.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
     "sass": "^1.86.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^15.0.0",
+    "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
