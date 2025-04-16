@@ -86,7 +86,7 @@
   @media (max-width: 768px) {
     height: 44px;
     padding: 0 15px 0 40px;
-    border-radius: 22px; // Rounded corners as per design
+    border-radius: v.$border-radius-lg;
   }
 }
 
