@@ -100,6 +100,27 @@
   }
 }
 
+.titleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.mobileLogoutButton {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #6B6B6B;
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: v.$color-primary;
+  }
+}
+
 @media (max-width: 768px) {
   .mainContent {
     flex-direction: column;
@@ -111,5 +132,13 @@
   
   .title {
     font-size: 24px;
+  }
+  
+  .mobileLogoutButton {
+    display: flex;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 } 

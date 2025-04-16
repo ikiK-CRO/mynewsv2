@@ -12,7 +12,7 @@ import Divider from '../components/Divider';
 import SearchSection from '../components/SearchSection';
 
 const FavoritesPage: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logOut } = useAuth();
   const router = useRouter();
   const [bookmarks, setBookmarks] = useState<UnifiedArticle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -74,6 +74,15 @@ const FavoritesPage: React.FC = () => {
     };
   }, []);
 
+  const handleLogOut = async () => {
+    try {
+      await logOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   if (authLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
@@ -95,15 +104,20 @@ const FavoritesPage: React.FC = () => {
         </div>
         <div className={styles.contentContainer}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Favorites</h1>
+            <div className={styles.titleContainer}>
+              <h1 className={styles.title}>Favorites</h1>
+              <button 
+                className={styles.mobileLogoutButton}
+                onClick={handleLogOut}
+                aria-label="Log out"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 7L15.59 8.41L18.17 11H8V13H18.17L15.59 15.58L17 17L22 12L17 7Z" fill="currentColor"/>
+                  <path d="M4 19H12V21H4C2.9 21 2 20.1 2 19V5C2 3.9 2.9 3 4 3H12V5H4V19Z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
             <p className={styles.subtitle}>Articles you've bookmarked for later</p>
-            <button 
-              className={styles.refreshButton}
-              onClick={fetchBookmarks}
-              disabled={loading}
-            >
-              Refresh Bookmarks
-            </button>
           </div>
           
           {loading ? (
