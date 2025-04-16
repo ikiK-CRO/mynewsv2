@@ -2,7 +2,7 @@
 
 MyNews is a full-stack news aggregation application that provides users with the latest news stories from around the world. The application features user authentication, article categorization, search functionality, and bookmark capabilities.
 
-![MyNews Screenshot](https://via.placeholder.com/800x400/E8E8E8/AAAAAA?text=MyNews+Screenshot)
+**[Live Demo](https://mynewsv.vercel.app/)**
 
 ## Features
 
@@ -89,7 +89,9 @@ Before you begin, ensure you have:
 
 ### Bookmarks
 
-- Click the bookmark icon on any article to save it to your favorites
+- Bookmark icons are positioned in the top-right corner of each article card for easy access
+- This consistent placement makes it intuitive for users to save articles while browsing
+- The bookmark icon changes state (filled/unfilled) to indicate whether an article is saved
 - Access your favorite articles from the "Favorites" option in the sidebar
 - Remove articles from your favorites by clicking the bookmark icon again
 
@@ -105,6 +107,13 @@ The application uses both NewsAPI and New York Times API to provide a diverse ra
 - Wider coverage of topics and perspectives
 - Backup sources in case one API experiences issues
 - Deduplication of similar stories from different sources
+
+### Article Sorting and Layout
+
+- **Breaking News**: Featured prominently at the top of the homepage in a larger card format to highlight important stories
+- **Category Sections**: Articles are sorted chronologically (newest first) within each category
+- **Latest News**: Located below the category sections, provides a continuous feed of the most recent articles with infinite scroll
+- **Ad Placements**: Non-intrusive ad cards are integrated within the article grid, clearly distinguished from news content while maintaining the overall design aesthetic
 
 ### Responsive Design
 
