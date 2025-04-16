@@ -33,16 +33,10 @@ function checkAndResetCounter() {
   }
 }
 
-interface RouteSegmentProps {
-  params: {
-    source: string;
-  };
-}
-
-// API route handler with the precise Next.js App Router signature
+// Next.js App Router specific type signature for route handlers
 export async function GET(
   request: NextRequest,
-  { params }: RouteSegmentProps
+  { params }: { params: { source: string } }
 ): Promise<NextResponse> {
   try {
     // Reset counter if it's a new day
