@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { SourceRouteParams, resolveRouteParams } from '../../../types/route-params';
 
 const NEWS_API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY || '';
 const NYT_API_KEY = process.env.NEXT_PUBLIC_NYT_API_KEY || '';
@@ -33,18 +34,17 @@ function checkAndResetCounter() {
   }
 }
 
-// Following exact Next.js 15 pattern for route handlers
+// Following Next.js documentation for route handlers
 export async function GET(
   request: NextRequest,
-  context: { params: { source: string } }
+  routeContext: SourceRouteParams
 ) {
   try {
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // IMPORTANT: Next.js requires params to be awaited in development
-    // This is required due to how Next.js handles dynamic route parameters
-    const params = await Promise.resolve(context.params);
+    // Safely await params before accessing
+    const { params } = await resolveRouteParams(routeContext);
     const source = params.source;
     
     console.log(`Processing request for source: ${source}`);
