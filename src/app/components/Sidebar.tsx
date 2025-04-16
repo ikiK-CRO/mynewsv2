@@ -81,7 +81,7 @@ const icons: Record<string, React.ReactNode> = {
 };
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Home', icon: icons.home, category: 'general' },
+  { href: '/', label: 'Home', icon: icons.home, category: 'all' },
   { href: '/category/general', label: 'General', icon: icons.general, category: 'general' },
   { href: '/category/business', label: 'Business', icon: icons.business, category: 'business' },
   { href: '/category/health', label: 'Health', icon: icons.health, category: 'health' },
@@ -96,7 +96,7 @@ interface SidebarProps {
   onCategoryChange?: (category: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'general', onCategoryChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeCategory = 'all', onCategoryChange }) => {
   const router = useRouter();
   const { user } = useAuth();
 

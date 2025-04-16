@@ -50,7 +50,7 @@ export const ArticleProvider = ({ children }: { children: React.ReactNode }) => 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const [activeCategory, setActiveCategory] = useState<string>('general');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   
   const [latestNewsPage, setLatestNewsPage] = useState<number>(1);
   const [latestNewsLoading, setLatestNewsLoading] = useState<boolean>(false);

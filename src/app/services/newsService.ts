@@ -68,15 +68,16 @@ function combineAndDeduplicate(arrays: UnifiedArticle[][]): UnifiedArticle[] {
  */
 export async function getLatestNews(page: number = 1, pageSize: number = 20): Promise<UnifiedArticle[]> {
   try {
-    // Reduced API calls - only 4 sources instead of 10
-    // But keeping both NewsAPI and NYTimes sources for diversity
+    // Reduced API calls but with better category diversity
     const results = await Promise.allSettled([
-      // NY Times - Most essential endpoints (2)
+      // NY Times - Multiple sections
       getMostPopularArticles(7),
       getTopStoriesBySection('home'),
-      // NewsAPI - Essential categories (2)
+      getTopStoriesBySection('business'),
+      // NewsAPI - Multiple categories
       getTopHeadlinesByCategory('general'),
-      getTopHeadlinesByCategory('technology')
+      getTopHeadlinesByCategory('technology'),
+      getTopHeadlinesByCategory('business')
     ]);
     
     // Collect all successful results
@@ -84,12 +85,8 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
     
     results.forEach((result, index) => {
       if (result.status === 'fulfilled' && result.value.length > 0) {
-        // Normalize all categories before adding to allArticles
-        const normalizedArticles = result.value.map(article => ({
-          ...article,
-          category: normalizeCategory(article.category)
-        }));
-        allArticles.push(...normalizedArticles);
+        // Keep the original categories instead of normalizing everything to match source
+        allArticles.push(...result.value);
         console.log(`Got ${result.value.length} articles from source ${index}`);
       }
     });
@@ -150,6 +147,55 @@ export async function getLatestNews(page: number = 1, pageSize: number = 20): Pr
  */
 export async function getNewsByCategory(category: string = 'general', forceRefresh: boolean = false): Promise<UnifiedArticle[]> {
   try {
+    // If category is 'all', fetch from multiple categories
+    if (category === 'all') {
+      console.log(`[newsService] Fetching news for all categories ${forceRefresh ? ' (forced refresh)' : ''}`);
+      
+      // Fetch from multiple sources/categories for a diverse set of news
+      const results = await Promise.allSettled([
+        getTopHeadlinesByCategory('general'),
+        getTopHeadlinesByCategory('business'),
+        getTopHeadlinesByCategory('technology'),
+        getTopStoriesBySection('home'),
+        getTopStoriesBySection('science'),
+        getTopStoriesBySection('health')
+      ]);
+      
+      const successfulResults: UnifiedArticle[][] = [];
+      
+      // Process results, logging any failures
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          successfulResults.push(result.value);
+          console.log(`Got ${result.value.length} articles from source ${index} for all categories`);
+        } else {
+          console.error(`API request ${index} failed for all categories:`, result.reason);
+        }
+      });
+      
+      // As long as at least one API succeeded, we can show some results
+      if (successfulResults.length > 0) {
+        // Get deduplicated articles
+        const dedupedArticles = combineAndDeduplicate(successfulResults);
+        
+        console.log(`[newsService] Got ${dedupedArticles.length} deduplicated articles for all categories`);
+        
+        // If we end up with an empty array, throw an error to trigger fallback
+        if (dedupedArticles.length === 0) {
+          throw new Error(`No articles found for all categories after deduplication`);
+        }
+        
+        // Sort articles by published date, newest first
+        return dedupedArticles.sort((a, b) => 
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
+      }
+      
+      // If everything failed, throw an error to trigger fallback
+      throw new Error(`All news sources failed for all categories`);
+    }
+    
+    // For specific categories, use existing logic
     // Map our app categories to NYTimes sections
     const nyTimesSection = category === 'general' ? 'home' : category;
     

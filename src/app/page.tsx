@@ -149,9 +149,13 @@ const Home: React.FC = () => {
     let icon = icons.home;
 
     switch (activeCategory) {
-      case 'general':
+      case 'all':
         label = 'Home';
         icon = icons.home;
+        break;
+      case 'general':
+        label = 'General';
+        icon = icons.general;
         break;
       case 'business':
         label = 'Business';

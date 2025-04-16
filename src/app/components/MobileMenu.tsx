@@ -21,7 +21,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const router = useRouter();
   
   const categoryItems = [
-    { id: 'general', label: 'Home', icon: icons.home },
+    { id: 'all', label: 'Home', icon: icons.home },
     { id: 'general', label: 'General', icon: icons.general },
     { id: 'business', label: 'Business', icon: icons.business },
     { id: 'health', label: 'Health', icon: icons.health },
