@@ -42,8 +42,10 @@ export async function GET(
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // Get the source from params directly
-    const source = context.params.source;
+    // IMPORTANT: Next.js requires params to be awaited in development
+    // This is required due to how Next.js handles dynamic route parameters
+    const params = await Promise.resolve(context.params);
+    const source = params.source;
     
     console.log(`Processing request for source: ${source}`);
     
