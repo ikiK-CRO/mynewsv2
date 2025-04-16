@@ -5,6 +5,7 @@ import { AuthProvider } from './AuthContext';
 import { ArticleProvider } from './ArticleContext';
 import { SearchProvider } from './SearchContext';
 import { BookmarkProvider } from './BookmarkContext';
+import { TransitionProvider } from './TransitionContext';
 
 /**
  * Main provider component that combines all context providers
@@ -16,7 +17,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       <ArticleProvider>
         <SearchProvider>
           <BookmarkProvider>
-            {children}
+            <TransitionProvider>
+              {children}
+            </TransitionProvider>
           </BookmarkProvider>
         </SearchProvider>
       </ArticleProvider>

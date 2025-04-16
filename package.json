@@ -19,6 +19,7 @@
     "firebase": "^10.14.1",
     "firebase-admin": "^13.2.0",
     "firebaseui": "^6.1.0",
+    "framer-motion": "^12.7.3",
     "next": "15.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

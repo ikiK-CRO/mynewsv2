@@ -21,6 +21,21 @@ const AD_FREQUENCY = 6; // Insert ad after every 5th article (appears at positio
 
 const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/400x250/E8E8E8/AAAAAA?text=No+Image';
 
+// Enhanced skeleton card component with better structure
+const NewsCardSkeleton = ({ index }: { index: number }) => (
+  <div className={`${styles.newsCard} ${styles.fadeIn} ${styles[`delay-${index + 1}`]}`}>
+    <div className={`${styles.skeletonImage} ${styles.shimmer}`}></div>
+    <div className={styles.cardContent}>
+      <div className={styles.cardHeader}>
+        <div className={`${styles.skeletonCategory} ${styles.shimmer}`}></div>
+        <div className={`${styles.skeletonSource} ${styles.shimmer}`}></div>
+      </div>
+      <div className={`${styles.skeletonTitle} ${styles.shimmer}`}></div>
+      <div className={`${styles.skeletonAuthor} ${styles.shimmer}`}></div>
+    </div>
+  </div>
+);
+
 const NewsGrid: React.FC<NewsGridProps> = ({ 
   articles: propArticles, 
   loading: propLoading 
@@ -34,6 +49,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({
   const loading = propLoading ?? contextLoading;
   
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+  const [imgLoaded, setImgLoaded] = useState<Record<string, boolean>>({});
   const [visibleCards, setVisibleCards] = useState<number>(INITIAL_VISIBLE_CARDS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -247,11 +263,19 @@ const NewsGrid: React.FC<NewsGridProps> = ({
     }
   };
 
-  // Handle image loading errors
-  const handleImageError = (articleId: string) => {
+  // Handle image loading
+  const handleImageLoad = (id: string) => {
+    setImgLoaded(prev => ({
+      ...prev,
+      [id]: true
+    }));
+  };
+  
+  // Handle image errors
+  const handleImageError = (id: string) => {
     setImgErrors(prev => ({
       ...prev,
-      [articleId]: true
+      [id]: true
     }));
   };
 
@@ -288,13 +312,14 @@ const NewsGrid: React.FC<NewsGridProps> = ({
     return (
       <article 
         key={article.id || `article-${index}`} 
-        className={`${styles.newsCard} ${isBreakingNews ? styles.breaking : ''}`}
+        className={`${styles.newsCard} ${isBreakingNews ? styles.breaking : ''} ${styles.fadeIn} ${styles[`delay-${index + 1}`]}`}
       >
         {!isBreakingNews && (
           <img
-            className={styles.newsImage}
+            className={`${styles.newsImage} ${imgLoaded[article.id] ? styles.loaded : ''}`}
             src={imgErrors[article.id] ? DEFAULT_PLACEHOLDER : (article.imageUrl || DEFAULT_PLACEHOLDER)}
             alt={article.title}
+            onLoad={() => handleImageLoad(article.id)}
             onError={() => handleImageError(article.id)}
             loading="lazy"
           />
@@ -315,7 +340,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({
             )}
           </div>
           
-          <h3 className={styles.title}>
+          <h3 className={styles.title} title={article.title}>
             <a 
               href={article.url} 
               target="_blank" 
@@ -336,6 +361,24 @@ const NewsGrid: React.FC<NewsGridProps> = ({
       </article>
     );
   };
+
+  // Enhanced skeleton loading display with the correct card layout
+  if (loading && articlesToDisplay.length === 0) {
+    return (
+      <div className={styles.newsGridWrapper}>
+        <div className={styles.newsGrid}>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <NewsCardSkeleton key={`skeleton-top-${index}`} index={index} />
+          ))}
+        </div>
+        <div className={styles.threeColGrid}>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <NewsCardSkeleton key={`skeleton-bottom-${index}`} index={index + 4} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.newsGridWrapper}>

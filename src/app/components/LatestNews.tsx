@@ -16,6 +16,19 @@ interface LatestNewsProps {
   hasMoreLatestNews?: boolean;
 }
 
+// Add skeleton loading for LatestNews widget
+const LatestNewsSkeleton = () => (
+  <div className={styles.newsItemSkeleton}>
+    <div className={styles.newsItemHeader}>
+      <span className={`${styles.timeSkeleton} ${styles.shimmer}`}></span>
+      <span className={`${styles.sourceSkeleton} ${styles.shimmer}`}></span>
+    </div>
+    <div className={styles.titleWrapper}>
+      <div className={`${styles.titleSkeleton} ${styles.shimmer}`}></div>
+    </div>
+  </div>
+);
+
 const LatestNews: React.FC<LatestNewsProps> = ({
   latestNews: propLatestNews,
   loading: propLoading,
@@ -168,6 +181,7 @@ const LatestNews: React.FC<LatestNewsProps> = ({
     };
   }, [handleScroll]);
 
+  // Update rendering for loading state
   if (loading && latestNews.length === 0) {
     return (
       <aside className={styles.latestNews}>
@@ -175,12 +189,15 @@ const LatestNews: React.FC<LatestNewsProps> = ({
           <span className={styles.icon}></span> Latest news
         </h2>
         <div className={styles.newsList}>
-          <p>Loading latest news...</p>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <LatestNewsSkeleton key={`skeleton-${index}`} />
+          ))}
         </div>
       </aside>
     );
   }
 
+  // Update news item rendering to include fade-in effects
   return (
     <aside className={`${styles.latestNews} ${isMobile ? styles.mobileLatestNews : ''}`} key={key}>
       <h2 className={styles.heading}>
@@ -192,7 +209,8 @@ const LatestNews: React.FC<LatestNewsProps> = ({
             {latestNews.map((item, index) => (
               <div 
                 key={`${item.id}-${index}`} 
-                className={styles.newsItem}
+                className={`${styles.newsItem} ${styles.fadeIn}`}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className={styles.newsItemHeader}>
                   <span className={styles.time}>{formatTime(item.publishedAt)}</span>
@@ -204,11 +222,7 @@ const LatestNews: React.FC<LatestNewsProps> = ({
                     className={styles.titleLink}
                     target="_blank" 
                     rel="noopener noreferrer"
-                    onClick={(e) => {
-                      // Prevent default behavior to avoid page navigation if needed
-                      // e.preventDefault();
-                      // Add analytics tracking or other logic here if needed
-                    }}
+                    title={item.title}
                   >
                     {item.title}
                   </a>
