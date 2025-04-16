@@ -43,9 +43,10 @@ export async function GET(
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // Safely await params before accessing
-    const { params } = await resolveRouteParams(routeContext);
-    const source = params.source;
+    // IMPORTANT: Fully resolve all dynamic route parameters at all levels
+    const resolved = await resolveRouteParams(routeContext);
+    // Access the fully resolved source value
+    const source = resolved.params.source;
     
     console.log(`Processing request for source: ${source}`);
     
