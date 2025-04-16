@@ -44,11 +44,26 @@ const LatestNews: React.FC<LatestNewsProps> = ({
   const newsListRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const [key, setKey] = useState(0); // Add a key to force re-render
+  const [isMobile, setIsMobile] = useState(false);
 
   // Force re-render when auth state changes
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [user]);
+
+  // Add this effect to handle mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Format time with date context
   const formatTime = (dateString: string): string => {
@@ -167,7 +182,7 @@ const LatestNews: React.FC<LatestNewsProps> = ({
   }
 
   return (
-    <aside className={styles.latestNews} key={key}>
+    <aside className={`${styles.latestNews} ${isMobile ? styles.mobileLatestNews : ''}`} key={key}>
       <h2 className={styles.heading}>
         <span className={styles.icon}></span> Latest news
       </h2>
@@ -175,7 +190,10 @@ const LatestNews: React.FC<LatestNewsProps> = ({
         {latestNews && latestNews.length > 0 ? (
           <>
             {latestNews.map((item, index) => (
-              <div key={`${item.id}-${index}`} className={styles.newsItem}>
+              <div 
+                key={`${item.id}-${index}`} 
+                className={styles.newsItem}
+              >
                 <div className={styles.newsItemHeader}>
                   <span className={styles.time}>{formatTime(item.publishedAt)}</span>
                   <span className={styles.source}>{item.source}</span>
@@ -186,6 +204,11 @@ const LatestNews: React.FC<LatestNewsProps> = ({
                     className={styles.titleLink}
                     target="_blank" 
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      // Prevent default behavior to avoid page navigation if needed
+                      // e.preventDefault();
+                      // Add analytics tracking or other logic here if needed
+                    }}
                   >
                     {item.title}
                   </a>

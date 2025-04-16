@@ -3,10 +3,37 @@
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0px 1px 2px -1px #C8CAD1;
-  height: 529px; /* Adjusted height to match 2 rows of 252px cards + 24px gap */
+  height: 540px; /* Adjusted height to match 2 rows of 252px cards + 24px gap */
   display: flex;
   flex-direction: column;
-  margin-top: 7px; /* Move widget down */
+  margin-top: 37px; /* Removed the 7px margin to reduce space */
+  
+  @media (max-width: 768px) {
+    margin-top: 0;
+    padding-top: 20px; /* Match the news grid exactly */
+  }
+}
+
+// Special mobile version with tighter spacing - adjust to match grid
+.mobileLatestNews {
+  margin-top: -10px;
+  padding-top: 20px; /* Match padding with news grid */
+  
+  .heading {
+    margin-bottom: 12px; /* Reduced from 18px */
+  }
+  
+  .newsList {
+    margin-top: 0;
+  }
+  
+  .newsItem {
+    padding: 12px 0; /* Reduced from 16px */
+    
+    &:first-child {
+      padding-top: 0;
+    }
+  }
 }
 
 .heading {
@@ -83,6 +110,7 @@
   gap: 2px;
   padding: 16px 0;
   border-bottom: 1px solid #E8E8E8;
+  transition: transform 0.1s ease-in-out; /* Add smooth transition */
 
   &:first-child {
      padding-top: 0;
@@ -91,6 +119,10 @@
   &:last-child {
     border-bottom: none;
     padding-bottom: 0;
+  }
+  
+  &:hover, &:active {
+    transform: translateY(-2px); /* Reduced from likely -4px to -2px for subtle movement */
   }
 }
 
@@ -136,9 +168,15 @@
   text-decoration: none;
   transition: color 0.2s;
   flex: 1;
+  display: block; /* Ensure the link is block level */
+  padding: 2px 0; /* Add padding to increase hit area but prevent layout shifts */
   
   &:hover {
     color: #1E71BB;
+  }
+  
+  &:active {
+    color: #1859A0; /* Darker blue when clicked */
   }
 }
 

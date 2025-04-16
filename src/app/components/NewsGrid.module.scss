@@ -7,6 +7,7 @@
   
   @media (max-width: 768px) {
     margin-top: 0;
+    padding-top: 20px;
   }
 }
 
@@ -14,21 +15,21 @@
 .newsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 36px;
   width: 100%;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 24px;
   }
 }
 
 /* 3-column grid for remaining cards */
 .threeColGrid {
-  margin-top: 24px;
+  margin-top: 36px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 36px;
   width: calc(639px + 24px + 321px - 7px); /* Main content + gap + widget width - 7px */
   position: relative;
   left: -3px;
@@ -41,8 +42,8 @@
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-top: 16px;
+    gap: 24px;
+    margin-top: 24px;
   }
 }
 

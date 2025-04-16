@@ -282,43 +282,66 @@ const NewsGrid: React.FC<NewsGridProps> = ({
   // Check if there are more cards to load
   const hasMoreCards = visibleCards < (articles?.length || 0);
 
+  const renderArticle = (article: UnifiedArticle, index: number) => {
+    const isBreakingNews = article.category === 'BREAKING';
+    
+    return (
+      <article 
+        key={article.id || `article-${index}`} 
+        className={`${styles.newsCard} ${isBreakingNews ? styles.breaking : ''}`}
+      >
+        {!isBreakingNews && (
+          <img
+            className={styles.newsImage}
+            src={imgErrors[article.id] ? DEFAULT_PLACEHOLDER : (article.imageUrl || DEFAULT_PLACEHOLDER)}
+            alt={article.title}
+            onError={() => handleImageError(article.id)}
+            loading="lazy"
+          />
+        )}
+        
+        <div className={styles.cardContent}>
+          <div className={styles.cardHeader}>
+            {isBreakingNews ? (
+              <>
+                <span className={styles.breakingTag}>Breaking</span>
+                <span className={styles.source}>{article.source}</span>
+              </>
+            ) : (
+              <>
+                <span className={styles.category}>{article.category?.toUpperCase() || 'NEWS'}</span>
+                <span className={styles.source}>{article.source}</span>
+              </>
+            )}
+          </div>
+          
+          <h3 className={styles.title}>
+            <a 
+              href={article.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                // Prevent excessive movement on click
+                // Add analytics tracking if needed
+              }}
+            >
+              {article.title}
+            </a>
+          </h3>
+          
+          {article.author && <p className={styles.author}>By {article.author} • {formatDate(article.publishedAt)}</p>}
+        </div>
+        
+        <BookmarkButton article={article} position="top-right" />
+      </article>
+    );
+  };
+
   return (
     <div className={styles.newsGridWrapper}>
       {/* Top 2x2 grid */}
       <div className={styles.newsGrid}>
-        {topGridArticles.map((article) => (
-          <div 
-            key={article.id} 
-            className={`${styles.newsCard} ${article.category === 'BREAKING' ? styles.breaking : ''}`}
-          >
-            <img 
-              src={imgErrors[article.id] ? DEFAULT_PLACEHOLDER : article.imageUrl || DEFAULT_PLACEHOLDER} 
-              alt={article.title} 
-              className={styles.newsImage}
-              onError={() => handleImageError(article.id)}
-              loading="lazy"
-            />
-            <BookmarkButton article={article} />
-            <div className={styles.cardContent}>
-              <div className={styles.cardHeader}>
-                {article.category === 'BREAKING' ? (
-                  <span className={styles.breakingTag}>BREAKING</span>
-                ) : (
-                  <span className={styles.category}>{article.category.toUpperCase()}</span>
-                )}
-                <span className={styles.source}>{article.source}</span>
-              </div>
-              <h3 className={styles.title}>
-                <a href={article.url} target="_blank" rel="noopener noreferrer">
-                  {article.title}
-                </a>
-              </h3>
-              <p className={styles.author}>
-                {article.author || 'Unknown'} • {formatDate(article.publishedAt)}
-              </p>
-            </div>
-          </div>
-        ))}
+        {topGridArticles.map((article) => renderArticle(article, 0))}
       </div>
       
       {/* Bottom 3-column grid with ads */}
@@ -329,39 +352,8 @@ const NewsGrid: React.FC<NewsGridProps> = ({
               <div key={`ad-${index}`} className={styles.threeColCard}>
                 <AdCard />
               </div>
-            ) : (
-              <div key={item.id} className={styles.threeColCard}>
-                <div className={`${styles.newsCard} ${item.category === 'BREAKING' ? styles.breaking : ''}`}>
-                  <img 
-                    src={imgErrors[item.id] ? DEFAULT_PLACEHOLDER : item.imageUrl || DEFAULT_PLACEHOLDER} 
-                    alt={item.title} 
-                    className={styles.newsImage}
-                    onError={() => handleImageError(item.id)}
-                    loading="lazy"
-                  />
-                  <BookmarkButton article={item} />
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardHeader}>
-                      {item.category === 'BREAKING' ? (
-                        <span className={styles.breakingTag}>BREAKING</span>
-                      ) : (
-                        <span className={styles.category}>{item.category.toUpperCase()}</span>
-                      )}
-                      <span className={styles.source}>{item.source}</span>
-                    </div>
-                    <h3 className={styles.title}>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        {item.title}
-                      </a>
-                    </h3>
-                    <p className={styles.author}>
-                      {item.author || 'Unknown'} • {formatDate(item.publishedAt)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )
-          ))}
+            ) : renderArticle(item, index))
+          )}
         </div>
       )}
       
