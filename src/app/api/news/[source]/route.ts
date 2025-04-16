@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 const NEWS_API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY || '';
 const NYT_API_KEY = process.env.NEXT_PUBLIC_NYT_API_KEY || '';
@@ -33,26 +33,24 @@ function checkAndResetCounter() {
   }
 }
 
-// Next.js App Router specific type signature for route handlers
+// Following exact Next.js 15 pattern for route handlers
 export async function GET(
   request: NextRequest,
-  { params }: { params: { source: string } }
-): Promise<NextResponse> {
+  context: { params: { source: string } }
+) {
   try {
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // IMPORTANT: Next.js requires params to be awaited before accessing properties
-    // This is essential for dynamic route parameters in App Router
-    const resolvedParams = await Promise.resolve(params);
-    const source = resolvedParams.source;
+    // Get the source from params directly
+    const source = context.params.source;
     
     console.log(`Processing request for source: ${source}`);
     
     // More explicit type checking and validation
     if (!source || typeof source !== 'string') {
       console.error('Invalid or missing source parameter:', source);
-      return NextResponse.json(
+      return Response.json(
         { error: 'Missing or invalid source parameter' },
         { status: 400 }
       );
@@ -64,7 +62,7 @@ export async function GET(
     // Validate source
     if (!['newsapi', 'nytimes'].includes(sourceStr)) {
       console.error(`Unsupported source requested: ${sourceStr}`);
-      return NextResponse.json(
+      return Response.json(
         { error: 'Invalid source. Use "newsapi" or "nytimes".' },
         { status: 400 }
       );
@@ -76,7 +74,7 @@ export async function GET(
     
     if (!endpoint) {
       console.error(`Missing endpoint parameter for ${sourceStr}`);
-      return NextResponse.json(
+      return Response.json(
         { error: 'Missing endpoint parameter' },
         { status: 400 }
       );
@@ -90,7 +88,7 @@ export async function GET(
         (Date.now() - cache[cacheKey].timestamp) < CACHE_DURATION) {
       const minutesRemaining = Math.round((CACHE_DURATION - (Date.now() - cache[cacheKey].timestamp)) / 60000);
       console.log(`Serving ${sourceStr}/${endpoint} from cache (expires in ${minutesRemaining} minutes)`);
-      return NextResponse.json(cache[cacheKey].data);
+      return Response.json(cache[cacheKey].data);
     }
 
     // Prepare the request based on the source
@@ -100,7 +98,7 @@ export async function GET(
     if (sourceStr === 'newsapi') {
       // Check if we're approaching the daily limit for NewsAPI
       if (newsApiRequestCount >= MAX_NEWS_API_REQUESTS) {
-        return NextResponse.json(
+        return Response.json(
           { 
             error: 'Rate limit protection', 
             message: 'Daily NewsAPI request limit reached. Please try again later.'
@@ -123,7 +121,7 @@ export async function GET(
       // NYTimes API
       // Check if we're approaching the daily limit for NYTimes API
       if (nytApiRequestCount >= MAX_NYT_API_REQUESTS) {
-        return NextResponse.json(
+        return Response.json(
           { 
             error: 'Rate limit protection', 
             message: 'Daily NYTimes API request limit reached. Please try again later.'
@@ -151,7 +149,7 @@ export async function GET(
           apiUrl = `${NYT_API_BASE_URL}/news/v3/content/${sourceParam}/${section}.json?api-key=${NYT_API_KEY}&limit=${limit}&offset=${offset}`;
           break;
         default:
-          return NextResponse.json(
+          return Response.json(
             { error: 'Invalid NYTimes endpoint. Use "topstories", "mostpopular", or "newswire".' },
             { status: 400 }
           );
@@ -180,7 +178,7 @@ export async function GET(
       
       console.error(`API error (${sourceStr}/${endpoint}): ${response.status}`, errorData);
       
-      return NextResponse.json(
+      return Response.json(
         { 
           error: errorData.message || `Failed to fetch data from ${sourceStr}`, 
           status: response.status
@@ -199,10 +197,10 @@ export async function GET(
     };
     
     // Return the data
-    return NextResponse.json(data);
+    return Response.json(data);
   } catch (error) {
     console.error('Error in news API proxy:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
