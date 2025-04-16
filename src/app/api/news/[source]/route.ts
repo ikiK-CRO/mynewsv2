@@ -33,27 +33,24 @@ function checkAndResetCounter() {
   }
 }
 
-/**
- * API route handler for news sources
- * Proxies requests to external news APIs (NewsAPI and NYTimes)
- * Implements caching and rate limiting
- * 
- * @param {NextRequest} request - The incoming request
- * @param {Object} context - Route context
- * @param {Object} context.params - Route parameters that must be awaited
- * @returns {Promise<NextResponse>} The API response
- */
+// Define params as a simple record for type safety
+type Params = {
+  params: {
+    source: string
+  }
+}
+
+// API route handler with the precise Next.js App Router signature
 export async function GET(
   request: NextRequest,
-  context: { params: { source: string } }
-) {
+  params: Params
+): Promise<NextResponse> {
   try {
     // Reset counter if it's a new day
     checkAndResetCounter();
     
-    // IMPORTANT: Next.js requires params to be awaited in App Router
-    const params = await Promise.resolve(context.params);
-    const { source } = params;
+    // Extract source from params using the correct structure
+    const source = params.params.source;
     
     console.log(`Processing request for source: ${source}`);
     
