@@ -4,8 +4,8 @@
 .divider {
   background-color: #EAECF0;
   
-  @media (max-width: 768px) {
-    display: none; // Hide divider on mobile
+  @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
+    display: none; // Hide divider on mobile and tablet
   }
 }
 
@@ -14,7 +14,7 @@
   height: 1px;
   margin: 20px 0;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
     margin: 8px 0;
   }
 }

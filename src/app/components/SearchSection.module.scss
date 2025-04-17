@@ -8,13 +8,13 @@
   align-items: flex-start;
   margin-left: v.$spacing-sm;
   
-  @media (min-width: 769px) {
+  @media (min-width: 1025px) {
     flex-direction: row;
     align-items: center;
     gap: 16px;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     margin-top: 24px;
     margin-left: 0;
     padding: 0 16px;
@@ -30,7 +30,7 @@
   width: 100%;
   margin-bottom: 16px;
   
-  @media (min-width: 769px) {
+  @media (min-width: 1025px) {
     width: auto;
     margin-bottom: 0;
   }
@@ -47,8 +47,8 @@
     color: v.$color-primary;
   }
   
-  @media (max-width: 768px) {
-    font-size: 32px;  // Larger size for mobile as per design
+  @media (max-width: 1024px) {
+    font-size: 32px;  // Larger size for mobile and tablet as per design
   }
 }
 
@@ -56,12 +56,12 @@
   position: relative;
   width: 100%;
   
-  @media (min-width: 769px) {
+  @media (min-width: 1025px) {
     max-width: 725px;
     flex-grow: 1;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     margin-left: 0;
   }
 }
@@ -83,7 +83,7 @@
     opacity: 0.4;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     height: 44px;
     padding: 0 15px 0 40px;
     border-radius: v.$border-radius-lg;
@@ -96,7 +96,7 @@
   height: 20px;
   color: v.$color-icon;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     top: 12px;
     left: 12px;
   }
@@ -114,8 +114,8 @@
   line-height: 20px;
   text-transform: uppercase;
   
-  @media (max-width: 768px) {
-    display: none; // Hide search button on mobile
+  @media (max-width: 1024px) {
+    display: none; // Hide search button on mobile and tablet
   }
 } 
 
@@ -137,7 +137,7 @@
   cursor: pointer;
   padding: 0;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: flex;
     flex-direction: column;
     justify-content: space-between;

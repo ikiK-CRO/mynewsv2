@@ -13,8 +13,8 @@
     repeat: no-repeat;
   }
   
-  @media (max-width: 768px) {
-    display: none; // Hide topbar on mobile
+  @media (max-width: 1024px) {
+    display: none; // Hide topbar on mobile and tablet
   }
 }
 

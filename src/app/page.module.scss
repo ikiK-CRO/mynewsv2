@@ -12,8 +12,8 @@
   margin-top: 0px; /* Updated to be 30px from divider */
   margin-bottom: 16px;
   
-  @media (max-width: 768px) {
-    display: none; // Hide section title on mobile
+  @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
+    display: none; // Hide section title on mobile and tablet
   }
 }
 
@@ -67,7 +67,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
   .sectionTitle {
     font-size: 20px;
   }
@@ -96,7 +96,7 @@
 .mobileTabs {
   display: none;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
     display: flex;
     width: 80%; /* Reduced from 100% to make tabs narrower */
     margin: 16px auto 8px auto; /* Center the tabs by using auto margins */
@@ -158,7 +158,7 @@
     font-size: 24px;
     font-weight: 600;
     
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
       display: flex; // Override display:none for search results title
     }
   }
@@ -182,7 +182,7 @@
 .categoryChipsRow {
   display: none;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) { // Changed from 768px to 1024px to include tablets
     display: flex;
     overflow-x: auto;
     padding: 0 16px;
