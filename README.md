@@ -35,7 +35,7 @@ Before you begin, ensure you have:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/mynewsv2.git
+   git clone https://github.com/ikiK-CRO/mynewsv2.git
    cd mynewsv2
    ```
 
